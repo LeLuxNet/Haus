@@ -58,7 +58,7 @@ export class PhilipsHue extends Lighting {
 
       if (data.state.hue !== undefined) {
         l.hue = new State(
-          data.state.hue,
+          data.state.hue / hueMult,
           () => this.getLightState(id).then((s) => s.hue! / hueMult),
           (val) => this.setLightState(id, { hue: val * hueMult })
         );
@@ -66,9 +66,17 @@ export class PhilipsHue extends Lighting {
 
       if (data.state.sat !== undefined) {
         l.sat = new State(
-          data.state.hue,
+          data.state.sat,
           () => this.getLightState(id).then((s) => s.sat!),
           (val) => this.setLightState(id, { sat: val })
+        );
+      }
+
+      if (data.state.ct !== undefined) {
+        l.ct = new State(
+          data.state.ct,
+          () => this.getLightState(id).then((s) => s.ct!),
+          (val) => this.setLightState(id, { ct: val })
         );
       }
 

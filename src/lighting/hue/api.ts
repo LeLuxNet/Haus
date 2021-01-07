@@ -58,9 +58,9 @@ export interface HueLightState {
   hue?: number;
   sat?: number;
 
-  effect: "none";
-  xy: [number, number];
-  ct: number;
+  effect?: "none";
+  xy?: [number, number];
+  ct?: number;
 
   alert: "select";
   colormode?: "xy";
