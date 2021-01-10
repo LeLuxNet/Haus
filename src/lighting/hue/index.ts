@@ -1,12 +1,13 @@
 import axios, { AxiosInstance } from "axios";
 import { Lighting } from "../lighting";
 import { Light } from "../light";
-import { HueLight, HueLightState, HueSensor, HueSensorState } from "./api";
 import { State } from "../../state";
 import { Sensor } from "../../sensors/sensor";
 import { NAME } from "../../const";
 
 const hueMult = 65535 / 360;
+const briMult = 254 / 255;
+const satMult = 254 / 255;
 
 export class PhilipsHue extends Lighting {
   api: AxiosInstance;
@@ -37,48 +38,41 @@ export class PhilipsHue extends Lighting {
 
   async allLights() {
     const res = await this.api.get("lights");
-    const lights = <[string, HueLight][]>Object.entries(res.data);
+    const lights = Object.entries<any>(res.data);
 
     return lights.map(([id, data]) => {
-      const on = new State(
-        data.state.on,
-        () => this.getLightState(id).then((s) => s.on),
-        (val) => this.setLightState(id, { on: val })
+      const l = new Light(
+        this.createState<boolean>(data.state, id, "on", "lights")!
       );
 
-      const l = new Light(on);
+      l.bri = this.createState(
+        data.state,
+        id,
+        "bri",
+        "lights",
+        (v) => v / briMult,
+        (v) => Math.round(v * briMult)
+      );
 
-      if (data.state.bri !== undefined) {
-        l.bri = new State(
-          data.state.bri,
-          () => this.getLightState(id).then((s) => s.bri!),
-          (val) => this.setLightState(id, { bri: val })
-        );
-      }
+      l.hue = this.createState(
+        data.state,
+        id,
+        "hue",
+        "lights",
+        (v) => v / hueMult,
+        (v) => Math.round(v * hueMult)
+      );
 
-      if (data.state.hue !== undefined) {
-        l.hue = new State(
-          data.state.hue / hueMult,
-          () => this.getLightState(id).then((s) => s.hue! / hueMult),
-          (val) => this.setLightState(id, { hue: val * hueMult })
-        );
-      }
+      l.sat = this.createState(
+        data.state,
+        id,
+        "sat",
+        "lights",
+        (v) => v / satMult,
+        (v) => Math.round(v * satMult)
+      );
 
-      if (data.state.sat !== undefined) {
-        l.sat = new State(
-          data.state.sat,
-          () => this.getLightState(id).then((s) => s.sat!),
-          (val) => this.setLightState(id, { sat: val })
-        );
-      }
-
-      if (data.state.ct !== undefined) {
-        l.ct = new State(
-          data.state.ct,
-          () => this.getLightState(id).then((s) => s.ct!),
-          (val) => this.setLightState(id, { ct: val })
-        );
-      }
+      l.ct = this.createState(data.state, id, "ct", "lights");
 
       return l;
     });
@@ -86,50 +80,44 @@ export class PhilipsHue extends Lighting {
 
   async allSensors() {
     const res = await this.api.get("sensors");
-    const sensors = <[string, HueSensor][]>Object.entries(res.data);
+    const sensors = Object.entries<any>(res.data);
 
     return sensors.map(([id, data]) => {
       const s = new Sensor();
 
-      if (data.state.lightlevel !== undefined) {
-        s.lightlevel = new State(
-          data.state.lightlevel,
-          () => this.getSensorState(id).then((s) => s.lightlevel!),
-          undefined
-        );
-      }
-
-      if (data.state.temperature !== undefined) {
-        s.temperature = new State(
-          data.state.temperature,
-          () => this.getSensorState(id).then((s) => s.temperature!),
-          undefined
-        );
-      }
-
-      if (data.state.presence !== undefined) {
-        s.presence = new State(
-          data.state.presence,
-          () => this.getSensorState(id).then((s) => s.presence!),
-          undefined
-        );
-      }
+      s.lightlevel = this.createState(data.state, id, "lightlevel", "sensors");
+      s.temperature = this.createState(
+        data.state,
+        id,
+        "temperature",
+        "sensors"
+      );
+      s.presence = this.createState(data.state, id, "presence", "sensors");
 
       return s;
     });
   }
 
-  private async getLightState(id: string): Promise<HueLightState> {
-    const res = await this.api.get(`lights/${id}/state`);
-    return res.data;
-  }
-
-  private async setLightState(id: string, state: object) {
-    await this.api.put(`lights/${id}/state`, state);
-  }
-
-  private async getSensorState(id: string): Promise<HueSensorState> {
-    const res = await this.api.get(`sensors/${id}/state`);
-    return res.data;
+  private createState<T>(
+    state: any,
+    id: string,
+    name: string,
+    type: "lights" | "sensors",
+    mapGet: (val: T) => T = (v) => v,
+    mapSet: (val: T) => T = (v) => v
+  ) {
+    if (state[name] === undefined) {
+      return undefined;
+    }
+    return new State<T>(
+      mapGet(state[name]),
+      () =>
+        this.api
+          .get(`${type}/${id}/state`)
+          .then((res) => mapGet(res.data[name])),
+      type === "sensors"
+        ? undefined
+        : (val) => this.api.put(`${type}/${id}/state`, { [name]: mapSet(val) })
+    );
   }
 }
