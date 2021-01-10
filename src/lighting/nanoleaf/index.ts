@@ -1,9 +1,13 @@
-import axios, { AxiosInstance } from "axios";
+import axios, { AxiosError, AxiosInstance } from "axios";
+import { config } from "process";
 import { State } from "../../state";
 import { Light } from "../light";
 import { Lighting } from "../lighting";
 
-class Nanoleaf extends Lighting {
+const briMult = 100 / 255;
+const satMult = 100 / 255;
+
+export class Nanoleaf extends Lighting {
   api: AxiosInstance;
 
   global: Light;
@@ -15,9 +19,17 @@ class Nanoleaf extends Lighting {
     });
 
     this.global = new Light(this.createState("on"));
-    this.global.bri = this.createState("brightness");
+    this.global.bri = this.createState(
+      "brightness",
+      (v) => v / briMult,
+      (v) => Math.round(v * briMult)
+    );
     this.global.hue = this.createState("hue");
-    this.global.sat = this.createState("sat");
+    this.global.sat = this.createState(
+      "sat",
+      (v) => v / satMult,
+      (v) => Math.round(v * satMult)
+    );
     this.global.ct = this.createState("ct");
   }
 
@@ -27,11 +39,15 @@ class Nanoleaf extends Lighting {
     return new Nanoleaf(host, res.data.auth_token);
   }
 
-  private createState<T>(name: string) {
+  private createState<T>(
+    name: string,
+    mapGet: (val: T) => T = (v) => v,
+    mapSet: (val: T) => T = (v) => v
+  ) {
     return new State<T>(
       undefined,
-      () => this.api.get(`state/${name}`).then((res) => res.data.value),
-      (val) => this.api.put("state", { [name]: { value: val } })
+      () => this.api.get(`state/${name}`).then((res) => mapGet(res.data.value)),
+      (val) => this.api.put("state", { [name]: { value: mapSet(val) } })
     );
   }
 }
