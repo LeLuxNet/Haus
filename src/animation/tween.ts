@@ -23,6 +23,8 @@ export class TweenAnimation extends EventEmitter {
     this.step();
     if (this.i > 0) {
       setTimeout(() => this.run(), this.sleep);
+    } else {
+      this.emit("stop");
     }
   }
 
