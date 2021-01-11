@@ -9,7 +9,7 @@ export class Razer extends Lighting {
   api: AxiosInstance;
   heartbeat: NodeJS.Timeout;
 
-  mousepad: Mousepad;
+  mousepad: RazerMousepad;
 
   constructor(host: string) {
     super();
@@ -17,7 +17,7 @@ export class Razer extends Lighting {
       baseURL: host,
     });
 
-    this.api.interceptors.request.use((config) => {
+    /* this.api.interceptors.request.use((config) => {
       console.log(config.url, config.data);
       return config;
     });
@@ -25,13 +25,13 @@ export class Razer extends Lighting {
     this.api.interceptors.response.use((res) => {
       console.log(res.data);
       return res;
-    });
+    }); */
 
     this.heartbeat = setInterval(() => {
       this.api.put("heartbeat");
     }, 1000);
 
-    this.mousepad = new Mousepad(this);
+    this.mousepad = new RazerMousepad(this);
   }
 
   static async create() {
@@ -62,7 +62,7 @@ export class Razer extends Lighting {
   }
 }
 
-class Mousepad {
+class RazerMousepad {
   razer: Razer;
 
   global: State<Color>;
@@ -71,35 +71,42 @@ class Mousepad {
   logo: State<Color>;
   corner: State<Color>[];
 
+  updateScheduled: boolean = false;
+
   constructor(razor: Razer) {
     this.razer = razor;
 
-    this.global = new State<Color>(undefined, undefined, (val) => {
+    this.global = new State<Color>(undefined, undefined, async (val) => {
       this.leds.forEach((e) => (e.last = val));
-      return this.razer.api.put("mousepad", {
-        effect: "CHROMA_STATIC",
-        param: {
-          color: toRzColor(val),
-        },
-      });
+      this.scheduleUpdate();
     });
 
     this.leds = [];
     for (let i = 0; i < 15; i++) {
       this.leds.push(
-        new State<Color>(undefined, undefined, () =>
-          this.razer.api.put("mousepad", {
-            effect: "CHROMA_CUSTOM",
-            param: this.leds.map((e) =>
-              e.last === undefined ? 0 : toRzColor(e.last)
-            ),
-          })
+        new State<Color>(undefined, undefined, async () =>
+          this.scheduleUpdate()
         )
       );
     }
 
     this.logo = this.leds[0];
     this.corner = this.leds.slice(1);
+  }
+
+  private scheduleUpdate() {
+    if (!this.updateScheduled) {
+      this.updateScheduled = true;
+      process.nextTick(() => {
+        this.updateScheduled = false;
+        this.razer.api.put("mousepad", {
+          effect: "CHROMA_CUSTOM",
+          param: this.leds.map((e) =>
+            e.last === undefined ? 0 : toRzColor(e.last)
+          ),
+        });
+      });
+    }
   }
 }
 
