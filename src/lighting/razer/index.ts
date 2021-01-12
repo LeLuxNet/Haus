@@ -5,13 +5,19 @@ import { Color } from "../color";
 import { Light } from "../light";
 import { Lighting } from "../lighting";
 
+interface RazerOptions {
+  mousepad?: "v1" | "v2";
+  mouse?: true;
+}
+
 export class Razer extends Lighting {
   api: AxiosInstance;
   heartbeat: NodeJS.Timeout;
 
-  mousepad: RazerMousepad;
+  mousepad?: RazerMousepad;
+  mouse?: RazerMouse;
 
-  constructor(host: string) {
+  constructor(host: string, options: RazerOptions = {}) {
     super();
     this.api = axios.create({
       baseURL: host,
@@ -31,7 +37,16 @@ export class Razer extends Lighting {
       this.api.put("heartbeat");
     }, 1000);
 
-    this.mousepad = new RazerMousepad(this);
+    if (options.mousepad !== undefined) {
+      this.mousepad = new RazerMousepad(
+        this,
+        options.mousepad === "v1" ? 15 : 20
+      );
+    }
+
+    if (options.mouse !== undefined) {
+      this.mouse = new RazerMouse(this);
+    }
   }
 
   static async create() {
@@ -68,12 +83,9 @@ class RazerMousepad {
   global: State<Color>;
   leds: State<Color>[];
 
-  logo: State<Color>;
-  corner: State<Color>[];
-
   updateScheduled: boolean = false;
 
-  constructor(razor: Razer) {
+  constructor(razor: Razer, leds: number) {
     this.razer = razor;
 
     this.global = new State<Color>(undefined, undefined, async (val) => {
@@ -82,16 +94,13 @@ class RazerMousepad {
     });
 
     this.leds = [];
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < leds; i++) {
       this.leds.push(
         new State<Color>(undefined, undefined, async () =>
           this.scheduleUpdate()
         )
       );
     }
-
-    this.logo = this.leds[0];
-    this.corner = this.leds.slice(1);
   }
 
   private scheduleUpdate() {
@@ -107,6 +116,27 @@ class RazerMousepad {
         });
       });
     }
+  }
+}
+
+class RazerMouse {
+  razer: Razer;
+
+  global: State<Color>;
+
+  updateScheduled: boolean = false;
+
+  constructor(razor: Razer) {
+    this.razer = razor;
+
+    this.global = new State<Color>(undefined, undefined, (val) =>
+      this.razer.api.put("mouse", {
+        effect: "CHROMA_STATIC",
+        param: {
+          color: toRzColor(val),
+        },
+      })
+    );
   }
 }
 
