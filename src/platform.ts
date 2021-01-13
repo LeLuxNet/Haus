@@ -1,1 +1,3 @@
-export class Platform {}
+export class Platform {
+  async stop() {}
+}

@@ -1,52 +1,46 @@
 import axios, { AxiosInstance } from "axios";
 import { AUTHOR, AUTHOR_LINK, NAME } from "../../const";
+import { Platform } from "../../platform";
 import { State } from "../../state";
 import { Color } from "../color";
 import { Light } from "../light";
 import { Lighting } from "../lighting";
-
-interface RazerOptions {
-  mousepad?: "v1" | "v2";
-  mouse?: true;
-}
+import { RazerHeadset } from "./devices/headset";
+import { RazerKeyboard } from "./devices/keyboard";
+import { RazerKeypad } from "./devices/keypad";
+import { RazerMouse } from "./devices/mouse";
+import { RazerMousepad } from "./devices/mousepad";
 
 export class Razer extends Lighting {
   api: AxiosInstance;
   heartbeat: NodeJS.Timeout;
 
-  mousepad?: RazerMousepad;
-  mouse?: RazerMouse;
+  headset: RazerHeadset;
+  keyboard: RazerKeyboard;
+  keypad: RazerKeypad;
+  mousepad: RazerMousepad;
+  mouse: RazerMouse;
 
-  constructor(host: string, options: RazerOptions = {}) {
+  constructor(host: string) {
     super();
     this.api = axios.create({
       baseURL: host,
     });
 
-    /* this.api.interceptors.request.use((config) => {
-      console.log(config.url, config.data);
-      return config;
-    });
-
     this.api.interceptors.response.use((res) => {
-      console.log(res.data);
+      console.log(res.config.url, res.config.data, res.data);
       return res;
-    }); */
+    });
 
     this.heartbeat = setInterval(() => {
       this.api.put("heartbeat");
     }, 1000);
 
-    if (options.mousepad !== undefined) {
-      this.mousepad = new RazerMousepad(
-        this,
-        options.mousepad === "v1" ? 15 : 20
-      );
-    }
-
-    if (options.mouse !== undefined) {
-      this.mouse = new RazerMouse(this);
-    }
+    this.headset = new RazerHeadset(this);
+    this.keyboard = new RazerKeyboard(this);
+    this.keypad = new RazerKeypad(this);
+    this.mousepad = new RazerMousepad(this);
+    this.mouse = new RazerMouse(this);
   }
 
   static async create() {
@@ -57,90 +51,22 @@ export class Razer extends Lighting {
         name: AUTHOR,
         contact: AUTHOR_LINK,
       },
-      device_supported: [
-        "keyboard",
-        "mouse",
-        "headset",
-        "mousepad",
-        "keypad",
-        "chromalink",
-      ],
+      device_supported: ["headset", "keyboard", "keypad", "mouse", "mousepad"],
       category: "application",
     });
 
     return new Razer(res.data.uri);
   }
 
-  stop() {
+  async stop() {
     clearInterval(this.heartbeat);
-    return this.api.delete("");
+    await this.api.delete("");
   }
 }
 
-class RazerMousepad {
-  razer: Razer;
+export function toRzColor(color?: Color) {
+  if (color === undefined) return 0;
 
-  global: State<Color>;
-  leds: State<Color>[];
-
-  updateScheduled: boolean = false;
-
-  constructor(razor: Razer, leds: number) {
-    this.razer = razor;
-
-    this.global = new State<Color>(undefined, undefined, async (val) => {
-      this.leds.forEach((e) => (e.last = val));
-      this.scheduleUpdate();
-    });
-
-    this.leds = [];
-    for (let i = 0; i < leds; i++) {
-      this.leds.push(
-        new State<Color>(undefined, undefined, async () =>
-          this.scheduleUpdate()
-        )
-      );
-    }
-  }
-
-  private scheduleUpdate() {
-    if (!this.updateScheduled) {
-      this.updateScheduled = true;
-      process.nextTick(() => {
-        this.updateScheduled = false;
-        this.razer.api.put("mousepad", {
-          effect: "CHROMA_CUSTOM",
-          param: this.leds.map((e) =>
-            e.last === undefined ? 0 : toRzColor(e.last)
-          ),
-        });
-      });
-    }
-  }
-}
-
-class RazerMouse {
-  razer: Razer;
-
-  global: State<Color>;
-
-  updateScheduled: boolean = false;
-
-  constructor(razor: Razer) {
-    this.razer = razor;
-
-    this.global = new State<Color>(undefined, undefined, (val) =>
-      this.razer.api.put("mouse", {
-        effect: "CHROMA_STATIC",
-        param: {
-          color: toRzColor(val),
-        },
-      })
-    );
-  }
-}
-
-function toRzColor(color: Color) {
   const [r, g, b] = color.toRGB();
   return (b << 16) + (g << 8) + r;
 }
