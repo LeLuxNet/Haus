@@ -30,8 +30,11 @@ export class Color {
   }
 
   static fromHSV(h: number, s: number, v: number) {
+    s /= 255;
+    v /= 255;
+
     const c = v * s;
-    const x = c * (1 - (Math.abs(h / 60) % 2) - 1);
+    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
     const m = v - c;
 
     var r = 0;
@@ -59,6 +62,32 @@ export class Color {
     }
 
     return Color.fromRGB((r + m) * 255, (g + m) * 255, (b + m) * 255);
+  }
+
+  static fromCIELAB(L: number, a: number, b: number) {
+    const delta = 6 / 29;
+    const f = (t: number) =>
+      t > delta ? Math.pow(t, 3) : 3 * Math.pow(delta, 2) * (t - 4 / 29);
+
+    const m = (L + 16) / 116;
+
+    const x = 95.0489 * f(m + a / 500);
+    const y = 100 * f(m);
+    const z = 108.884 * f(m - b / 200);
+
+    return new Color(x, y, z);
+  }
+
+  static chroma(hue: number, chroma: number, L: number) {
+    const a = chroma * 127 * Math.cos(2 * Math.PI * hue);
+    const b = chroma * 127 * Math.sin(2 * Math.PI * hue);
+
+    return Color.fromCIELAB(L, a, b);
+  }
+
+  static mix(a: Color, b: Color, percent: number = 0.5) {
+    const mixVal = (a: number, b: number) => a * percent + b * (1 - percent);
+    return new Color(mixVal(a.x, b.x), mixVal(a.y, b.y), mixVal(a.z, b.z));
   }
 
   toRGB(): [number, number, number] {

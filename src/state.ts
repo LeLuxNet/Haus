@@ -37,6 +37,20 @@ export class State<T> extends EventEmitter {
     }
   }
 
+  static link<T>(...states: State<T>[]) {
+    const state = new State<T>(undefined, undefined, async (val) => {
+      await Promise.all(
+        states.map(async (e) => {
+          if (e.set !== undefined) {
+            await e.set(val);
+          }
+        })
+      );
+    });
+
+    return state;
+  }
+
   update(value: T) {
     this.last = value;
     this.emit("value", value);
