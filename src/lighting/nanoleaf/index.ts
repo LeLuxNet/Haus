@@ -1,6 +1,7 @@
 import axios, { AxiosError, AxiosInstance } from "axios";
 import { config } from "process";
 import { State } from "../../state";
+import { Color } from "../color";
 import { Light } from "../light";
 import { Lighting } from "../lighting";
 
@@ -18,19 +19,35 @@ export class Nanoleaf extends Lighting {
       baseURL: `${host}/api/v1/${key}`,
     });
 
-    this.global = new Light(this.createState("on"));
-    this.global.bri = this.createState(
-      "brightness",
-      (v) => v / briMult,
-      (v) => Math.round(v * briMult)
+    this.global = new Light(
+      new State(
+        undefined,
+        () => this.api.get(`state/on`).then((res) => res.data.value),
+        (val) => this.api.put("state", { on: { value: val } })
+      ),
+
+      new State<Color>(
+        undefined,
+        () =>
+          this.api
+            .get(`state`)
+            .then((res) =>
+              Color.fromHSV(
+                res.data.hue.value,
+                res.data.brightness / briMult,
+                res.data.sat / satMult
+              )
+            ),
+        (val) => {
+          const [h, s, v] = val.toHSV();
+          return this.api.put("state", {
+            hue: { value: h },
+            saturation: { value: Math.round(s * satMult) },
+            brightness: { value: Math.round(v * briMult) },
+          });
+        }
+      )
     );
-    this.global.hue = this.createState("hue");
-    this.global.sat = this.createState(
-      "sat",
-      (v) => v / satMult,
-      (v) => Math.round(v * satMult)
-    );
-    this.global.ct = this.createState("ct");
   }
 
   static async link(host: string) {
@@ -39,15 +56,7 @@ export class Nanoleaf extends Lighting {
     return new Nanoleaf(host, res.data.auth_token);
   }
 
-  private createState<T>(
-    name: string,
-    mapGet: (val: T) => T = (v) => v,
-    mapSet: (val: T) => T = (v) => v
-  ) {
-    return new State<T>(
-      undefined,
-      () => this.api.get(`state/${name}`).then((res) => mapGet(res.data.value)),
-      (val) => this.api.put("state", { [name]: { value: mapSet(val) } })
-    );
+  async devices() {
+    return [this.global];
   }
 }

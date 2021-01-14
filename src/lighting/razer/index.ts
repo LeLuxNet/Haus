@@ -1,15 +1,13 @@
 import axios, { AxiosInstance } from "axios";
 import { AUTHOR, AUTHOR_LINK, NAME } from "../../const";
-import { Platform } from "../../platform";
-import { State } from "../../state";
 import { Color } from "../color";
-import { Light } from "../light";
 import { Lighting } from "../lighting";
 import { RazerHeadset } from "./devices/headset";
 import { RazerKeyboard } from "./devices/keyboard";
 import { RazerKeypad } from "./devices/keypad";
 import { RazerMouse } from "./devices/mouse";
 import { RazerMousepad } from "./devices/mousepad";
+import { RazerError } from "./error";
 
 export class Razer extends Lighting {
   api: AxiosInstance;
@@ -28,7 +26,9 @@ export class Razer extends Lighting {
     });
 
     this.api.interceptors.response.use((res) => {
-      console.log(res.config.url, res.config.data, res.data);
+      if (res.data.result) {
+        throw new RazerError(res.data.result, res.data.error);
+      }
       return res;
     });
 
@@ -56,6 +56,16 @@ export class Razer extends Lighting {
     });
 
     return new Razer(res.data.uri);
+  }
+
+  async devices() {
+    return [
+      this.headset,
+      this.keyboard,
+      this.keypad,
+      this.mousepad,
+      this.mouse,
+    ];
   }
 
   async stop() {

@@ -29,6 +29,38 @@ export class Color {
     return new Color(x, y, z);
   }
 
+  static fromHSV(h: number, s: number, v: number) {
+    const c = v * s;
+    const x = c * (1 - (Math.abs(h / 60) % 2) - 1);
+    const m = v - c;
+
+    var r = 0;
+    var g = 0;
+    var b = 0;
+
+    if (h < 60) {
+      r = c;
+      g = x;
+    } else if (h < 120) {
+      r = x;
+      g = c;
+    } else if (h < 180) {
+      g = c;
+      b = x;
+    } else if (h < 240) {
+      g = x;
+      b = c;
+    } else if (h < 300) {
+      r = x;
+      b = c;
+    } else {
+      r = c;
+      b = x;
+    }
+
+    return Color.fromRGB((r + m) * 255, (g + m) * 255, (b + m) * 255);
+  }
+
   toRGB(): [number, number, number] {
     const r = 3.24096994 * this.x - 1.53738318 * this.y - 0.49861076 * this.z;
     const g = -0.96924364 * this.x + 1.8759675 * this.y + 0.04155506 * this.z;

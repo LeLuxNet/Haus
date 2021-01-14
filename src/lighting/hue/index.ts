@@ -4,6 +4,7 @@ import { Light } from "../light";
 import { State } from "../../state";
 import { Sensor } from "../../sensors/sensor";
 import { NAME } from "../../const";
+import { Color } from "../color";
 
 const hueMult = 65535 / 360;
 const briMult = 254 / 255;
@@ -42,37 +43,37 @@ export class PhilipsHue extends Lighting {
 
     return lights.map(([id, data]) => {
       const l = new Light(
-        this.createState<boolean>(data.state, id, "on", "lights")!
+        new State(
+          data.state.on,
+          () => this.api.get(`lights/${id}/state`).then((res) => res.data.on),
+          (val) => this.api.put(`lights/${id}/state`, { on: val })
+        ),
+        new State(
+          Color.fromHSV(
+            res.data.hue / hueMult,
+            res.data.sat / satMult,
+            res.data.bri / briMult
+          ),
+          () =>
+            this.api
+              .get(`lights/${id}/state`)
+              .then((res) =>
+                Color.fromHSV(
+                  res.data.hue / hueMult,
+                  res.data.sat / satMult,
+                  res.data.bri / briMult
+                )
+              ),
+          (val) => {
+            const [h, s, v] = val.toHSV();
+            return this.api.put(`lights/${id}/state`, {
+              hue: Math.round(h * hueMult),
+              sat: Math.round(s * satMult),
+              bri: Math.round(v * briMult),
+            });
+          }
+        )
       );
-
-      l.bri = this.createState(
-        data.state,
-        id,
-        "bri",
-        "lights",
-        (v) => v / briMult,
-        (v) => Math.round(v * briMult)
-      );
-
-      l.hue = this.createState(
-        data.state,
-        id,
-        "hue",
-        "lights",
-        (v) => v / hueMult,
-        (v) => Math.round(v * hueMult)
-      );
-
-      l.sat = this.createState(
-        data.state,
-        id,
-        "sat",
-        "lights",
-        (v) => v / satMult,
-        (v) => Math.round(v * satMult)
-      );
-
-      l.ct = this.createState(data.state, id, "ct", "lights");
 
       return l;
     });
@@ -85,39 +86,26 @@ export class PhilipsHue extends Lighting {
     return sensors.map(([id, data]) => {
       const s = new Sensor();
 
-      s.lightlevel = this.createState(data.state, id, "lightlevel", "sensors");
-      s.temperature = this.createState(
-        data.state,
-        id,
-        "temperature",
-        "sensors"
-      );
-      s.presence = this.createState(data.state, id, "presence", "sensors");
+      s.lightlevel = this.createSensorState(data.state, id, "lightlevel");
+      s.temperature = this.createSensorState(data.state, id, "temperature");
+      s.presence = this.createSensorState(data.state, id, "presence");
 
       return s;
     });
   }
 
-  private createState<T>(
-    state: any,
-    id: string,
-    name: string,
-    type: "lights" | "sensors",
-    mapGet: (val: T) => T = (v) => v,
-    mapSet: (val: T) => T = (v) => v
-  ) {
+  private createSensorState<T>(state: any, id: string, name: string) {
     if (state[name] === undefined) {
       return undefined;
     }
     return new State<T>(
-      mapGet(state[name]),
-      () =>
-        this.api
-          .get(`${type}/${id}/state`)
-          .then((res) => mapGet(res.data[name])),
-      type === "sensors"
-        ? undefined
-        : (val) => this.api.put(`${type}/${id}/state`, { [name]: mapSet(val) })
+      state[name],
+      () => this.api.get(`sensors/${id}/state`).then((res) => res.data[name]),
+      undefined
     );
+  }
+
+  async devices() {
+    return [...(await this.allLights()), ...(await this.allSensors())];
   }
 }

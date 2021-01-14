@@ -1,3 +1,3 @@
 import { Platform } from "../platform";
 
-export class Lighting extends Platform {}
+export abstract class Lighting extends Platform {}

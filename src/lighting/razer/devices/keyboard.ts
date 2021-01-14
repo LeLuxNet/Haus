@@ -1,4 +1,3 @@
-import { json } from "express";
 import { Razer, toRzColor } from "..";
 import { State } from "../../../state";
 import { Color } from "../../color";
