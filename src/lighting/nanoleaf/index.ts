@@ -13,13 +13,14 @@ export class Nanoleaf extends Lighting {
 
   global: Light;
 
-  constructor(host: string, key: string) {
-    super();
+  constructor(host: string, key: string, id: string) {
+    super(id);
     this.api = axios.create({
       baseURL: `${host}/api/v1/${key}`,
     });
 
     this.global = new Light(
+      this,
       new State(
         undefined,
         () => this.api.get(`state/on`).then((res) => res.data.value),
@@ -42,7 +43,7 @@ export class Nanoleaf extends Lighting {
           const [h, s, v] = val.toHSV();
           return this.api.put("state", {
             hue: { value: h },
-            saturation: { value: Math.round(s * satMult) },
+            sat: { value: Math.round(s * satMult) },
             brightness: { value: Math.round(v * briMult) },
           });
         }
@@ -50,10 +51,10 @@ export class Nanoleaf extends Lighting {
     );
   }
 
-  static async link(host: string) {
+  static async link(host: string, id: string) {
     const res = await axios.post(`${host}/api/v1/new`);
 
-    return new Nanoleaf(host, res.data.auth_token);
+    return new Nanoleaf(host, res.data.auth_token, id);
   }
 
   async devices() {

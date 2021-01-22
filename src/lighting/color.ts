@@ -78,9 +78,9 @@ export class Color {
     return new Color(x, y, z);
   }
 
-  static chroma(hue: number, chroma: number, L: number) {
-    const a = chroma * 127 * Math.cos(2 * Math.PI * hue);
-    const b = chroma * 127 * Math.sin(2 * Math.PI * hue);
+  static chroma(L: number, hue: number) {
+    const a = 127 * Math.cos(2 * Math.PI * hue);
+    const b = 127 * Math.sin(2 * Math.PI * hue);
 
     return Color.fromCIELAB(L, a, b);
   }

@@ -55,8 +55,4 @@ export class State<T> extends EventEmitter {
     this.last = value;
     this.emit("value", value);
   }
-
-  toString() {
-    return `State(${this.last})`;
-  }
 }

@@ -19,8 +19,8 @@ export class Razer extends Lighting {
   mousepad: RazerMousepad;
   mouse: RazerMouse;
 
-  constructor(host: string) {
-    super();
+  constructor(host: string, id: string) {
+    super(id);
     this.api = axios.create({
       baseURL: host,
     });
@@ -43,7 +43,7 @@ export class Razer extends Lighting {
     this.mouse = new RazerMouse(this);
   }
 
-  static async create() {
+  static async create(id: string) {
     const res = await axios.post("http://localhost:54235/razer/chromasdk", {
       title: NAME,
       description: " ",
@@ -55,7 +55,7 @@ export class Razer extends Lighting {
       category: "application",
     });
 
-    return new Razer(res.data.uri);
+    return new Razer(res.data.uri, id);
   }
 
   async devices() {

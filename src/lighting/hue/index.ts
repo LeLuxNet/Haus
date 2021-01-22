@@ -13,14 +13,14 @@ const satMult = 254 / 255;
 export class PhilipsHue extends Lighting {
   api: AxiosInstance;
 
-  constructor(host: string, key: string) {
-    super();
+  constructor(host: string, key: string, id: string) {
+    super(id);
     this.api = axios.create({
       baseURL: `${host}/api/${key}`,
     });
   }
 
-  static async link(host: string) {
+  static async link(host: string, id: string) {
     const res = await axios.post(`${host}/api`, {
       devicetype: NAME.toLowerCase(),
     });
@@ -33,7 +33,7 @@ export class PhilipsHue extends Lighting {
         throw data.error.description;
       }
     } else {
-      return new PhilipsHue(host, data.success.username);
+      return new PhilipsHue(host, data.success.username, id);
     }
   }
 
@@ -42,7 +42,8 @@ export class PhilipsHue extends Lighting {
     const lights = Object.entries<any>(res.data);
 
     return lights.map(([id, data]) => {
-      const l = new Light(
+      const l: Light = new Light(
+        this,
         new State(
           data.state.on,
           () => this.api.get(`lights/${id}/state`).then((res) => res.data.on),
@@ -84,7 +85,7 @@ export class PhilipsHue extends Lighting {
     const sensors = Object.entries<any>(res.data);
 
     return sensors.map(([id, data]) => {
-      const s = new Sensor();
+      const s: Sensor = new Sensor(this);
 
       s.lightlevel = this.createSensorState(data.state, id, "lightlevel");
       s.temperature = this.createSensorState(data.state, id, "temperature");
