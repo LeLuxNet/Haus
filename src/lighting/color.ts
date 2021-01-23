@@ -71,14 +71,14 @@ export class Color {
 
     const m = (L + 16) / 116;
 
-    const x = 95.0489 * f(m + a / 500);
-    const y = 100 * f(m);
-    const z = 108.884 * f(m - b / 200);
+    const x = 0.950489 * f(m + a / 500);
+    const y = f(m);
+    const z = 1.08884 * f(m - b / 200);
 
     return new Color(x, y, z);
   }
 
-  static chroma(L: number, hue: number) {
+  static chroma(hue: number, L: number = 75) {
     const a = 127 * Math.cos(2 * Math.PI * hue);
     const b = 127 * Math.sin(2 * Math.PI * hue);
 
@@ -135,5 +135,10 @@ export class Color {
     const s = Cmax === 0 ? 0 : (delta / Cmax) * 255;
 
     return [h < 0 ? h + 360 : h, s, Cmax * 255];
+  }
+
+  toString() {
+    const [r, g, b] = this.toRGB();
+    return "#" + [r, g, b].map((x) => x.toString(16).padStart(2, "0")).join("");
   }
 }

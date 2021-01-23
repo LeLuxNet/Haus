@@ -50,8 +50,16 @@ describe("CIELAB2XYZ", () => {
   it("should be red", async () => {
     const col = Color.fromCIELAB(53.241, 80.092, 67.203);
 
-    expect(col.x).toBe(41.246604320962945);
-    expect(col.y).toBe(21.267479688878765);
-    expect(col.z).toBe(1.9334690576577374);
+    expect(col.x).toBeCloseTo(0.41246);
+    expect(col.y).toBeCloseTo(0.21267);
+    expect(col.z).toBeCloseTo(0.01933);
+  });
+
+  it("should be purple", async () => {
+    const col = Color.fromCIELAB(60.324, 98.234, -60.825);
+
+    expect(col.x).toBeCloseTo(0.59289);
+    expect(col.y).toBeCloseTo(0.28485);
+    expect(col.z).toBeCloseTo(0.96964);
   });
 });
