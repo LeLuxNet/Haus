@@ -8,7 +8,7 @@ export class RazerDevice extends Device {
   update: Update;
 
   constructor(razer: Razer, fun: () => Promise<void>) {
-    super();
+    super(razer);
     this.razer = razer;
     this.update = new Update(fun);
   }

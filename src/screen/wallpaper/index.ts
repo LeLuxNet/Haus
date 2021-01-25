@@ -1,16 +1,16 @@
 import sharp from "sharp";
+import { promisify } from "util";
 import wallpaper from "wallpaper";
 import { Platform } from "../../platform";
 import { Screen } from "../screen";
+import fs from "fs";
 
 export class Wallpaper extends Platform {
   image: Screen;
-  _buffer: Buffer;
 
   constructor(id: string, width: number, height: number) {
     super(id);
     this.image = new Screen(this, width, height, () => this.update());
-    this._buffer = Buffer.alloc(this.image.width * this.image.height * 3);
 
     // this.update();
   }
@@ -20,20 +20,21 @@ export class Wallpaper extends Platform {
   }
 
   async update() {
+    // No need to clear the memory as it will be completly overwritten anyways
+    const buffer = Buffer.allocUnsafe(this.image.width * this.image.height * 3);
+
     for (let x = 0; x < this.image.width; x++) {
       for (let y = 0; y < this.image.height; y++) {
         const [r, g, b] = this.image.pixels[x][y].last!.toRGB();
         const i = (y * this.image.width + x) * 3;
 
-        this._buffer[i] = r;
-        this._buffer[i + 1] = g;
-        this._buffer[i + 2] = b;
+        buffer[i] = r;
+        buffer[i + 1] = g;
+        buffer[i + 2] = b;
       }
     }
 
-    console.log(this._buffer);
-
-    const img = sharp(this._buffer, {
+    const img = sharp(buffer, {
       raw: {
         width: this.image.width,
         height: this.image.height,
@@ -45,5 +46,9 @@ export class Wallpaper extends Platform {
     await img.toFile(name);
 
     await wallpaper.set(name);
+
+    // Can be replaced by "fs/promise" when electron updates to node v12.19
+    const unlink = promisify(fs.unlink);
+    await unlink(name);
   }
 }
