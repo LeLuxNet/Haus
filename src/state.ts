@@ -52,7 +52,9 @@ export class State<T> extends EventEmitter {
   }
 
   update(value: T) {
-    this.last = value;
-    this.emit("value", value);
+    if (this.last !== value) {
+      this.last = value;
+      this.emit("value", value);
+    }
   }
 }
