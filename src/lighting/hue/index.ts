@@ -37,6 +37,17 @@ export class PhilipsHue extends Lighting {
     }
   }
 
+  static async discover(stealth: boolean = false) {
+    const ips: string[] = [];
+
+    if (!stealth) {
+      const res = await axios.get("https://discovery.meethue.com/");
+      res.data.forEach((e: any) => ips.push(e.internalipaddress));
+    }
+
+    return ips;
+  }
+
   async allLights() {
     const res = await this.api.get("lights");
     const lights = Object.entries<any>(res.data);

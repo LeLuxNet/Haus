@@ -1,21 +1,27 @@
 import { EventEmitter } from "events";
+import { Trigger } from "./trigger";
 
 type Get<T> = () => Promise<T>;
 type Set<T> = (val: T) => Promise<void>;
 
-export class State<T> extends EventEmitter {
+export class State<T> extends Trigger<T> {
   last?: T;
 
-  get?: Get<T>;
+  autoUpdate?: number;
+  _autoUpdateInterval?: NodeJS.Timeout;
+
+  readonly get?: Get<T>;
   set?: Set<T>;
 
   constructor(
     initial: T | undefined,
     get: Get<T> | undefined,
-    set: Set<T> | undefined
+    set: Set<T> | undefined,
+    { autoUpdate }: { autoUpdate?: number } = {}
   ) {
     super();
     this.last = initial;
+    this.autoUpdate = autoUpdate;
 
     if (get !== undefined) {
       this.get = () =>
@@ -26,6 +32,13 @@ export class State<T> extends EventEmitter {
 
       if (this.last === undefined) {
         this.get();
+      }
+
+      if (this.subscribers.length < 0 && this.autoUpdate !== undefined) {
+        this._autoUpdateInterval = setInterval(
+          this.get,
+          this.autoUpdate * 1000
+        );
       }
     }
 
@@ -54,7 +67,31 @@ export class State<T> extends EventEmitter {
   update(value: T) {
     if (this.last !== value) {
       this.last = value;
-      this.emit("value", value);
+      this.trigger(value);
+    }
+  }
+
+  subscribe(fn: () => void) {
+    if (
+      this._autoUpdateInterval === undefined &&
+      this.autoUpdate !== undefined &&
+      this.get !== undefined
+    ) {
+      this._autoUpdateInterval = setInterval(this.get, this.autoUpdate * 1000);
+    }
+
+    super.subscribe(fn);
+  }
+
+  unsubscripe(fn: () => void) {
+    super.unsubscribe(fn);
+
+    if (
+      this._autoUpdateInterval !== undefined &&
+      this.subscribers.length === 0
+    ) {
+      clearInterval(this._autoUpdateInterval);
+      this._autoUpdateInterval = undefined;
     }
   }
 }
