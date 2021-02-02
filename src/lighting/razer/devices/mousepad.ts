@@ -1,11 +1,12 @@
 import { Razer, toRzColor } from "..";
 import { State } from "../../../state";
 import { Color } from "../../color";
+import { ColorState } from "../../state";
 import { RazerDevice } from "../device";
 
 export class RazerMousepad extends RazerDevice {
-  global: State<Color>;
-  leds: State<Color>[];
+  global: ColorState;
+  leds: ColorState[];
 
   constructor(razer: Razer) {
     super(razer, () =>
@@ -15,17 +16,17 @@ export class RazerMousepad extends RazerDevice {
       })
     );
 
-    this.global = new State<Color>(undefined, undefined, async (val) => {
-      this.leds.forEach((e) => (e.last = val));
-      this.update.scedule();
+    this.global = new ColorState({
+      set: async (val) => {
+        this.leds.forEach((e) => (e.last = val));
+        this.update.scedule();
+      },
     });
 
     this.leds = [];
     for (let i = 0; i < 15; i++) {
       this.leds.push(
-        new State<Color>(undefined, undefined, async () =>
-          this.update.scedule()
-        )
+        new ColorState({ set: async () => this.update.scedule() })
       );
     }
   }

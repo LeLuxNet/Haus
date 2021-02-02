@@ -1,10 +1,11 @@
 import { Razer, toRzColor } from "..";
 import { State } from "../../../state";
 import { Color } from "../../color";
+import { ColorState } from "../../state";
 import { RazerDevice } from "../device";
 
 export class RazerKeypad extends RazerDevice {
-  keys: State<Color>[][];
+  keys: ColorState[][];
 
   constructor(razer: Razer) {
     super(razer, () =>
@@ -19,8 +20,10 @@ export class RazerKeypad extends RazerDevice {
       const row = [];
       for (let j = 0; j < 5; j++) {
         row.push(
-          new State<Color>(undefined, undefined, async () => {
-            this.update.scedule();
+          new ColorState({
+            set: async () => {
+              this.update.scedule();
+            },
           })
         );
       }

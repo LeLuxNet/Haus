@@ -1,11 +1,10 @@
 import { Razer, toRzColor } from "..";
-import { State } from "../../../state";
-import { Color } from "../../color";
+import { ColorState } from "../../state";
 import { RazerDevice } from "../device";
 
 export class RazerHeadset extends RazerDevice {
-  left: State<Color>;
-  right: State<Color>;
+  left: ColorState;
+  right: ColorState;
 
   constructor(razer: Razer) {
     super(razer, () =>
@@ -15,12 +14,16 @@ export class RazerHeadset extends RazerDevice {
       })
     );
 
-    this.left = new State<Color>(undefined, undefined, async () => {
-      this.update.scedule();
+    this.left = new ColorState({
+      set: async () => {
+        this.update.scedule();
+      },
     });
 
-    this.right = new State<Color>(undefined, undefined, async () => {
-      this.update.scedule();
+    this.right = new ColorState({
+      set: async () => {
+        this.update.scedule();
+      },
     });
   }
 }

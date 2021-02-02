@@ -6,6 +6,7 @@ import { Sensor } from "../../sensors/sensor";
 import { NAME, UPDATE_PRESENCE, UPDATE_SENSOR } from "../../const";
 import { Color } from "../color";
 import { HueButton } from "./button";
+import { ColorState } from "../state";
 
 const hueMult = 65535 / 360;
 const briMult = 254 / 255;
@@ -56,18 +57,19 @@ export class PhilipsHue extends Lighting {
     return lights.map(([id, data]) => {
       const l: Light = new Light(
         this,
-        new State(
-          data.state.on,
-          () => this.api.get(`lights/${id}/state`).then((res) => res.data.on),
-          (val) => this.api.put(`lights/${id}/state`, { on: val })
-        ),
-        new State(
-          Color.fromHSV(
+        new State({
+          initial: data.state.on,
+          get: () =>
+            this.api.get(`lights/${id}/state`).then((res) => res.data.on),
+          set: (val) => this.api.put(`lights/${id}/state`, { on: val }),
+        }),
+        new ColorState({
+          initial: Color.fromHSV(
             res.data.hue / hueMult,
             res.data.sat / satMult,
             res.data.bri / briMult
           ),
-          () =>
+          get: () =>
             this.api
               .get(`lights/${id}/state`)
               .then((res) =>
@@ -77,15 +79,15 @@ export class PhilipsHue extends Lighting {
                   res.data.bri / briMult
                 )
               ),
-          (val) => {
+          set: (val) => {
             const [h, s, v] = val.toHSV();
             return this.api.put(`lights/${id}/state`, {
               hue: Math.round(h * hueMult),
               sat: Math.round(s * satMult),
               bri: Math.round(v * briMult),
             });
-          }
-        )
+          },
+        })
       );
 
       return l;
@@ -110,39 +112,36 @@ export class PhilipsHue extends Lighting {
       const s: Sensor = sensors.get(uid) || new Sensor(this);
 
       if (data.state.lightlevel !== undefined) {
-        s.lightlevel = new State(
-          data.state.lightlevel,
-          () =>
+        s.lightlevel = new State({
+          initial: data.state.lightlevel,
+          get: () =>
             this.api
               .get(`sensors/${id}`)
               .then((res) => res.data.state.lightlevel),
-          undefined,
-          { autoUpdate: UPDATE_SENSOR }
-        );
+          autoUpdate: UPDATE_SENSOR,
+        });
       }
 
       if (data.state.temperature !== undefined) {
-        s.temperature = new State<number>(
-          data.state.temperature / 100,
-          () =>
+        s.temperature = new State<number>({
+          initial: data.state.temperature / 100,
+          get: () =>
             this.api
               .get(`sensors/${id}`)
               .then((res) => res.data.state.temperature / 100),
-          undefined,
-          { autoUpdate: UPDATE_SENSOR }
-        );
+          autoUpdate: UPDATE_SENSOR,
+        });
       }
 
       if (data.state.presence !== undefined) {
-        s.presence = new State(
-          data.state.presence,
-          () =>
+        s.presence = new State({
+          initial: data.state.presence,
+          get: () =>
             this.api
               .get(`sensors/${id}`)
               .then((res) => res.data.state.presence),
-          undefined,
-          { autoUpdate: UPDATE_PRESENCE }
-        );
+          autoUpdate: UPDATE_PRESENCE,
+        });
       }
 
       if (data.state.buttonevent !== undefined) {

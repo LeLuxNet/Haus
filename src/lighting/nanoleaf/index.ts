@@ -4,6 +4,7 @@ import { State } from "../../state";
 import { Color } from "../color";
 import { Light } from "../light";
 import { Lighting } from "../lighting";
+import { ColorState } from "../state";
 
 const briMult = 100 / 255;
 const satMult = 100 / 255;
@@ -21,15 +22,13 @@ export class Nanoleaf extends Lighting {
 
     this.global = new Light(
       this,
-      new State(
-        undefined,
-        () => this.api.get(`state/on`).then((res) => res.data.value),
-        (val) => this.api.put("state", { on: { value: val } })
-      ),
+      new State({
+        get: () => this.api.get(`state/on`).then((res) => res.data.value),
+        set: (val) => this.api.put("state", { on: { value: val } }),
+      }),
 
-      new State<Color>(
-        undefined,
-        () =>
+      new ColorState({
+        get: () =>
           this.api
             .get(`state`)
             .then((res) =>
@@ -39,15 +38,15 @@ export class Nanoleaf extends Lighting {
                 res.data.sat / satMult
               )
             ),
-        (val) => {
+        set: (val) => {
           const [h, s, v] = val.toHSV();
           return this.api.put("state", {
             hue: { value: h },
             sat: { value: Math.round(s * satMult) },
             brightness: { value: Math.round(v * briMult) },
           });
-        }
-      )
+        },
+      })
     );
   }
 

@@ -4,6 +4,15 @@ import { Trigger } from "./trigger";
 type Get<T> = () => Promise<T>;
 type Set<T> = (val: T) => Promise<void>;
 
+export interface StateConstructor<T> {
+  initial?: T;
+
+  get?: Get<T>;
+  set?: Set<T>;
+
+  autoUpdate?: number;
+}
+
 export class State<T> extends Trigger<T> {
   last?: T;
 
@@ -13,12 +22,7 @@ export class State<T> extends Trigger<T> {
   readonly get?: Get<T>;
   set?: Set<T>;
 
-  constructor(
-    initial: T | undefined,
-    get: Get<T> | undefined,
-    set: Set<T> | undefined,
-    { autoUpdate }: { autoUpdate?: number } = {}
-  ) {
+  constructor({ initial, get, set, autoUpdate }: StateConstructor<T>) {
     super();
     this.last = initial;
     this.autoUpdate = autoUpdate;
@@ -51,14 +55,16 @@ export class State<T> extends Trigger<T> {
   }
 
   static link<T>(...states: State<T>[]) {
-    const state = new State<T>(undefined, undefined, async (val) => {
-      await Promise.all(
-        states.map(async (e) => {
-          if (e.set !== undefined) {
-            await e.set(val);
-          }
-        })
-      );
+    const state = new State<T>({
+      set: async (val) => {
+        await Promise.all(
+          states.map(async (e) => {
+            if (e.set !== undefined) {
+              await e.set(val);
+            }
+          })
+        );
+      },
     });
 
     return state;

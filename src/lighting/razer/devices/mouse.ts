@@ -1,17 +1,18 @@
 import { Razer, toRzColor } from "..";
 import { State } from "../../../state";
 import { Color } from "../../color";
+import { ColorState } from "../../state";
 import { RazerDevice } from "../device";
 
 export class RazerMouse extends RazerDevice {
-  scrollWheel: State<Color>;
-  numpad: State<Color>;
-  logo: State<Color>;
+  scrollWheel: ColorState;
+  numpad: ColorState;
+  logo: ColorState;
 
-  left: State<Color>[];
-  right: State<Color>[];
+  left: ColorState[];
+  right: ColorState[];
 
-  bottom: State<Color>[];
+  bottom: ColorState[];
 
   constructor(razer: Razer) {
     super(razer, () =>
@@ -87,39 +88,29 @@ export class RazerMouse extends RazerDevice {
       })
     );
 
-    this.scrollWheel = new State<Color>(undefined, undefined, async () =>
-      this.update.scedule()
-    );
+    this.scrollWheel = new ColorState({
+      set: async () => this.update.scedule(),
+    });
 
-    this.numpad = new State<Color>(undefined, undefined, async () =>
-      this.update.scedule()
-    );
+    this.numpad = new ColorState({ set: async () => this.update.scedule() });
 
-    this.logo = new State<Color>(undefined, undefined, async () =>
-      this.update.scedule()
-    );
+    this.logo = new ColorState({ set: async () => this.update.scedule() });
 
     this.left = [];
     this.right = [];
     for (let i = 0; i < 7; i++) {
       this.left.push(
-        new State<Color>(undefined, undefined, async () =>
-          this.update.scedule()
-        )
+        new ColorState({ set: async () => this.update.scedule() })
       );
       this.right.push(
-        new State<Color>(undefined, undefined, async () =>
-          this.update.scedule()
-        )
+        new ColorState({ set: async () => this.update.scedule() })
       );
     }
 
     this.bottom = [];
     for (let i = 0; i < 5; i++) {
       this.bottom.push(
-        new State<Color>(undefined, undefined, async () =>
-          this.update.scedule()
-        )
+        new ColorState({ set: async () => this.update.scedule() })
       );
     }
   }

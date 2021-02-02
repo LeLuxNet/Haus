@@ -1,6 +1,7 @@
 import { Razer, toRzColor } from "..";
 import { State } from "../../../state";
 import { Color } from "../../color";
+import { ColorState } from "../../state";
 import { RazerDevice } from "../device";
 
 enum Keys {
@@ -140,8 +141,8 @@ enum Keys {
 }
 
 export class RazerKeyboard extends RazerDevice {
-  keyMap: Map<string, State<Color>>;
-  keyList: State<Color>[];
+  keyMap: Map<string, ColorState>;
+  keyList: ColorState[];
 
   constructor(razer: Razer) {
     super(razer, () =>
@@ -299,8 +300,10 @@ export class RazerKeyboard extends RazerDevice {
     this.keyMap = new Map();
     this.keyList = [];
     Object.values(Keys).forEach((e) => {
-      const key = new State<Color>(undefined, undefined, async () => {
-        this.update.scedule();
+      const key = new ColorState({
+        set: async () => {
+          this.update.scedule();
+        },
       });
 
       this.keyMap.set(e, key);

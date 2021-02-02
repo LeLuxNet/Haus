@@ -1,13 +1,13 @@
 import { Device } from "../device";
 import { Color } from "../lighting/color";
+import { ColorState } from "../lighting/state";
 import { Platform } from "../platform";
-import { State } from "../state";
 
 export class Screen extends Device {
   width: number;
   height: number;
 
-  pixels: State<Color>[][];
+  pixels: ColorState[][];
   update: () => void;
 
   constructor(
@@ -21,11 +21,16 @@ export class Screen extends Device {
     this.width = width;
     this.height = height;
 
-    this.pixels = new Array(width).fill(null).map((_, x) =>
-      new Array(height).fill(null).map(
-        (_, y) => new State<Color>(fill(x, y), undefined, async () => update())
-      )
-    );
+    this.pixels = new Array(width)
+      .fill(null)
+      .map((_, x) =>
+        new Array(height)
+          .fill(null)
+          .map(
+            (_, y) =>
+              new ColorState({ initial: fill(x, y), set: async () => update() })
+          )
+      );
 
     this.update = update;
   }

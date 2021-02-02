@@ -6,11 +6,8 @@ export class GitHub extends Counter {
   id: string;
 
   constructor(id: string, name: string, val: number, avatar: string) {
-    super(
-      new State(name, undefined, undefined),
-      new State(val, undefined, undefined)
-    );
-    this.avatar = new State(avatar, undefined, undefined);
+    super(new State({ initial: name }), new State({ initial: val }));
+    this.avatar = new State({ initial: avatar });
 
     this.id = id;
 

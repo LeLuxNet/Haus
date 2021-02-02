@@ -7,15 +7,12 @@ export class YouTube extends Counter {
   key: string;
 
   constructor(id: string, key: string) {
-    super(
-      new State<string>(undefined, undefined, undefined),
-      new State<number>(undefined, undefined, undefined)
-    );
+    super(new State<string>({}), new State<number>({}));
 
     this.id = id;
     this.key = key;
 
-    this.avatar = new State<string>(undefined, undefined, undefined);
+    this.avatar = new State<string>({});
 
     this._update();
     setInterval(() => this._update(), 1 * 60 * 1000);
