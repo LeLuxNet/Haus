@@ -71,7 +71,7 @@ export class State<T> extends Trigger<T> {
     }
   }
 
-  subscribe(fn: () => void) {
+  subscribe(fn: (val: T) => void) {
     if (
       this._autoUpdateInterval === undefined &&
       this.autoUpdate !== undefined &&
@@ -83,7 +83,7 @@ export class State<T> extends Trigger<T> {
     super.subscribe(fn);
   }
 
-  unsubscripe(fn: () => void) {
+  unsubscripe(fn: (val: T) => void) {
     super.unsubscribe(fn);
 
     if (

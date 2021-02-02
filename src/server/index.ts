@@ -1,5 +1,6 @@
 import { Home, homes } from "./home";
 import { createApi } from "./api";
+import { PhilipsHue } from "../lighting/hue";
 
 export function startServer(port: string | number) {
   console.log("Starting server");

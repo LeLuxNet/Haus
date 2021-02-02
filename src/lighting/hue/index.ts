@@ -3,8 +3,9 @@ import { Lighting } from "../lighting";
 import { Light } from "../light";
 import { State } from "../../state";
 import { Sensor } from "../../sensors/sensor";
-import { NAME } from "../../const";
+import { NAME, UPDATE_PRESENCE, UPDATE_SENSOR } from "../../const";
 import { Color } from "../color";
+import { HueButton } from "./button";
 
 const hueMult = 65535 / 360;
 const briMult = 254 / 255;
@@ -98,22 +99,54 @@ export class PhilipsHue extends Lighting {
     return sensors.map(([id, data]) => {
       const s: Sensor = new Sensor(this);
 
-      s.lightlevel = this.createSensorState(data.state, id, "lightlevel");
-      s.temperature = this.createSensorState(data.state, id, "temperature");
-      s.presence = this.createSensorState(data.state, id, "presence");
+      s.lightlevel = this.createSensorState(
+        data.state,
+        id,
+        "lightlevel",
+        UPDATE_SENSOR
+      );
+
+      if (data.state.temperature !== undefined) {
+        s.temperature = new State<number>(
+          data.state.temperature / 100,
+          () =>
+            this.api
+              .get(`sensors/${id}`)
+              .then((res) => res.data.state.temperature / 100),
+          undefined,
+          { autoUpdate: UPDATE_SENSOR }
+        );
+      }
+
+      s.presence = this.createSensorState(
+        data.state,
+        id,
+        "presence",
+        UPDATE_PRESENCE
+      );
+
+      if (data.state.buttonevent !== undefined) {
+        s.button = new HueButton(data.state, id, this);
+      }
 
       return s;
     });
   }
 
-  private createSensorState<T>(state: any, id: string, name: string) {
+  private createSensorState<T>(
+    state: any,
+    id: string,
+    name: string,
+    update: number
+  ) {
     if (state[name] === undefined) {
       return undefined;
     }
     return new State<T>(
       state[name],
-      () => this.api.get(`sensors/${id}/state`).then((res) => res.data[name]),
-      undefined
+      () => this.api.get(`sensors/${id}`).then((res) => res.data.state[name]),
+      undefined,
+      { autoUpdate: update }
     );
   }
 
