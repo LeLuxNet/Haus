@@ -94,17 +94,32 @@ export class PhilipsHue extends Lighting {
 
   async allSensors() {
     const res = await this.api.get("sensors");
-    const sensors = Object.entries<any>(res.data);
 
-    return sensors.map(([id, data]) => {
-      const s: Sensor = new Sensor(this);
+    const sensors: Map<string, Sensor> = new Map();
+    for (const [id, data] of Object.entries<any>(res.data)) {
+      if (
+        data.state.lightlevel === undefined &&
+        data.state.temperature === undefined &&
+        data.state.presence === undefined &&
+        data.state.buttonevent === undefined
+      ) {
+        continue;
+      }
 
-      s.lightlevel = this.createSensorState(
-        data.state,
-        id,
-        "lightlevel",
-        UPDATE_SENSOR
-      );
+      const uid = data.uniqueid.split("-")[0];
+      const s: Sensor = sensors.get(uid) || new Sensor(this);
+
+      if (data.state.lightlevel !== undefined) {
+        s.lightlevel = new State(
+          data.state.lightlevel,
+          () =>
+            this.api
+              .get(`sensors/${id}`)
+              .then((res) => res.data.state.lightlevel),
+          undefined,
+          { autoUpdate: UPDATE_SENSOR }
+        );
+      }
 
       if (data.state.temperature !== undefined) {
         s.temperature = new State<number>(
@@ -118,36 +133,27 @@ export class PhilipsHue extends Lighting {
         );
       }
 
-      s.presence = this.createSensorState(
-        data.state,
-        id,
-        "presence",
-        UPDATE_PRESENCE
-      );
+      if (data.state.presence !== undefined) {
+        s.presence = new State(
+          data.state.presence,
+          () =>
+            this.api
+              .get(`sensors/${id}`)
+              .then((res) => res.data.state.presence),
+          undefined,
+          { autoUpdate: UPDATE_PRESENCE }
+        );
+      }
 
       if (data.state.buttonevent !== undefined) {
         s.button = new HueButton(data.state, id, this);
       }
 
-      return s;
-    });
-  }
-
-  private createSensorState<T>(
-    state: any,
-    id: string,
-    name: string,
-    update: number
-  ) {
-    if (state[name] === undefined) {
-      return undefined;
+      sensors.set(uid, s);
     }
-    return new State<T>(
-      state[name],
-      () => this.api.get(`sensors/${id}`).then((res) => res.data.state[name]),
-      undefined,
-      { autoUpdate: update }
-    );
+
+    console.log(sensors.values());
+    return sensors.values();
   }
 
   async devices() {
