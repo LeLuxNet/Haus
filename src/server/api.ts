@@ -38,7 +38,10 @@ export function createApi() {
   app.get("/home/:home/devices", (req, res) => {
     res.send(
       req.home.devices.map((d) => {
-        return {};
+        return {
+          id: d.id,
+          name: d.name,
+        };
       })
     );
   });

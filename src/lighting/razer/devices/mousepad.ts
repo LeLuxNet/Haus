@@ -9,11 +9,14 @@ export class RazerMousepad extends RazerDevice {
   leds: ColorState[];
 
   constructor(razer: Razer) {
-    super(razer, () =>
-      this.razer.api.put("mousepad", {
-        effect: "CHROMA_CUSTOM",
-        param: this.leds.map((e) => toRzColor(e.last)),
-      })
+    super(
+      razer,
+      () =>
+        this.razer.api.put("mousepad", {
+          effect: "CHROMA_CUSTOM",
+          param: this.leds.map((e) => toRzColor(e.last)),
+        }),
+      "mousepad"
     );
 
     this.global = new ColorState({

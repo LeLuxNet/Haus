@@ -7,11 +7,20 @@ export class RazerHeadset extends RazerDevice {
   right: ColorState;
 
   constructor(razer: Razer) {
-    super(razer, () =>
-      this.razer.api.put("headset", {
-        effect: "CHROMA_CUSTOM",
-        param: [toRzColor(this.left.last), toRzColor(this.right.last), 0, 0, 0],
-      })
+    super(
+      razer,
+      () =>
+        this.razer.api.put("headset", {
+          effect: "CHROMA_CUSTOM",
+          param: [
+            toRzColor(this.left.last),
+            toRzColor(this.right.last),
+            0,
+            0,
+            0,
+          ],
+        }),
+      "headset"
     );
 
     this.left = new ColorState({

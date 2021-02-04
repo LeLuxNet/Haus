@@ -11,13 +11,14 @@ export class Screen extends Device {
   update: () => void;
 
   constructor(
+    id: number,
     platform: Platform,
     width: number,
     height: number,
     update: () => void,
     fill: (x: number, y: number) => Color = (_, __) => new Color(0, 0, 0)
   ) {
-    super(platform);
+    super(id, platform);
     this.width = width;
     this.height = height;
 

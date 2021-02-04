@@ -8,11 +8,14 @@ export class RazerKeypad extends RazerDevice {
   keys: ColorState[][];
 
   constructor(razer: Razer) {
-    super(razer, () =>
-      this.razer.api.put("keypad", {
-        effect: "CHROMA_CUSTOM",
-        param: this.keys.map((a) => a.map((b) => toRzColor(b.last))),
-      })
+    super(
+      razer,
+      () =>
+        this.razer.api.put("keypad", {
+          effect: "CHROMA_CUSTOM",
+          param: this.keys.map((a) => a.map((b) => toRzColor(b.last))),
+        }),
+      "keypad"
     );
 
     this.keys = [];

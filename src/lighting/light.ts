@@ -8,8 +8,13 @@ export class Light extends Device {
   on: State<boolean>;
   color: ColorState;
 
-  constructor(platform: Platform, on: State<boolean>, color: ColorState) {
-    super(platform);
+  constructor(
+    id: number,
+    platform: Platform,
+    on: State<boolean>,
+    color: ColorState
+  ) {
+    super(id, platform);
     this.on = on;
     this.color = color;
   }

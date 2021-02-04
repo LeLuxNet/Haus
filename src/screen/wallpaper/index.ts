@@ -4,13 +4,20 @@ import wallpaper from "wallpaper";
 import { Platform } from "../../platform";
 import { Screen } from "../screen";
 import fs from "fs";
+import { Home } from "../../server/home";
 
 export class Wallpaper extends Platform {
   image: Screen;
 
-  constructor(id: string, width: number, height: number) {
-    super(id);
-    this.image = new Screen(this, width, height, () => this.update());
+  constructor(id: string, home: Home, width: number, height: number) {
+    super(id, home);
+    this.image = new Screen(
+      this.home.getDeviceId(this),
+      this,
+      width,
+      height,
+      () => this.update()
+    );
 
     // this.update();
   }

@@ -7,6 +7,7 @@ import { NAME, UPDATE_PRESENCE, UPDATE_SENSOR } from "../../const";
 import { Color } from "../color";
 import { HueButton } from "./button";
 import { ColorState } from "../state";
+import { Home } from "../../server/home";
 
 const hueMult = 65535 / 360;
 const briMult = 254 / 255;
@@ -15,14 +16,14 @@ const satMult = 254 / 255;
 export class PhilipsHue extends Lighting {
   api: AxiosInstance;
 
-  constructor(host: string, key: string, id: string) {
-    super(id);
+  constructor(host: string, key: string, id: string, home: Home) {
+    super(id, home);
     this.api = axios.create({
       baseURL: `${host}/api/${key}`,
     });
   }
 
-  static async link(host: string, id: string) {
+  static async link(host: string, id: string, home: Home) {
     const res = await axios.post(`${host}/api`, {
       devicetype: NAME.toLowerCase(),
     });
@@ -35,7 +36,7 @@ export class PhilipsHue extends Lighting {
         throw data.error.description;
       }
     } else {
-      return new PhilipsHue(host, data.success.username, id);
+      return new PhilipsHue(host, data.success.username, id, home);
     }
   }
 
@@ -43,7 +44,7 @@ export class PhilipsHue extends Lighting {
     const ips: string[] = [];
 
     if (!stealth) {
-      const res = await axios.get("https://discovery.meethue.com/");
+      const res = await axios.get("https://discovery.meethue.com");
       res.data.forEach((e: any) => ips.push(e.internalipaddress));
     }
 
@@ -56,6 +57,7 @@ export class PhilipsHue extends Lighting {
 
     return lights.map(([id, data]) => {
       const l: Light = new Light(
+        this.home.getDeviceId(this, data.uniqueid),
         this,
         new State({
           initial: data.state.on,
@@ -90,6 +92,8 @@ export class PhilipsHue extends Lighting {
         })
       );
 
+      l.name = data.name;
+
       return l;
     });
   }
@@ -109,7 +113,12 @@ export class PhilipsHue extends Lighting {
       }
 
       const uid = data.uniqueid.split("-")[0];
-      const s: Sensor = sensors.get(uid) || new Sensor(this);
+      const s: Sensor =
+        sensors.get(uid) || new Sensor(this.home.getDeviceId(this, uid), this);
+
+      if (!data.name.startsWith(data.productname)) {
+        s.name = data.name;
+      }
 
       if (data.state.lightlevel !== undefined) {
         s.lightlevel = new State({
@@ -151,11 +160,13 @@ export class PhilipsHue extends Lighting {
       sensors.set(uid, s);
     }
 
-    console.log(sensors.values());
     return sensors.values();
   }
 
   async devices() {
-    return [...(await this.allLights()), ...(await this.allSensors())];
+    const lights = await this.allLights();
+    const sensors = await this.allSensors();
+
+    return [...lights, ...sensors];
   }
 }

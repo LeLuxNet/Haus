@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from "axios";
 import { AUTHOR, AUTHOR_LINK, NAME } from "../../const";
+import { Home } from "../../server/home";
 import { Color } from "../color";
 import { Lighting } from "../lighting";
 import { RazerHeadset } from "./devices/headset";
@@ -19,8 +20,8 @@ export class Razer extends Lighting {
   mousepad: RazerMousepad;
   mouse: RazerMouse;
 
-  constructor(host: string, id: string) {
-    super(id);
+  constructor(host: string, id: string, home: Home) {
+    super(id, home);
     this.api = axios.create({
       baseURL: host,
     });
@@ -43,7 +44,7 @@ export class Razer extends Lighting {
     this.mouse = new RazerMouse(this);
   }
 
-  static async create(id: string) {
+  static async create(id: string, home: Home) {
     const res = await axios.post("http://localhost:54235/razer/chromasdk", {
       title: NAME,
       description: " ",
@@ -55,7 +56,7 @@ export class Razer extends Lighting {
       category: "application",
     });
 
-    return new Razer(res.data.uri, id);
+    return new Razer(res.data.uri, id, home);
   }
 
   async devices() {
