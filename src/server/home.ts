@@ -11,24 +11,24 @@ export class Home {
   platforms: Platform[] = [];
   devices: Device[] = [];
 
-  private dids: Map<string, number> = new Map();
-  private nextDid: number;
+  private dIds: Map<string, number> = new Map();
+  private nextDId: number;
 
   constructor(id: string, name: string) {
     this.id = id;
     this.name = name;
 
     // TODO: Load from save
-    this.nextDid = 0;
+    this.nextDId = 1;
   }
 
   getDeviceId(platform: Platform, uid?: string) {
     const did = uid === undefined ? platform.id : `${platform.id}|${uid}`;
 
-    var id = this.dids.get(did);
+    var id = this.dIds.get(did);
     if (id === undefined) {
-      id = this.nextDid++;
-      this.dids.set(did, id);
+      id = this.nextDId++;
+      this.dIds.set(did, id);
     }
     return id;
   }
