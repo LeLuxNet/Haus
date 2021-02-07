@@ -78,6 +78,55 @@ export class Color {
     return new Color(x, y, z);
   }
 
+  static fromXYY(x: number, y: number, Y: number) {
+    if (y === 0) {
+      return new Color(0, 0, 0);
+    }
+
+    return new Color((x * Y) / y, Y, ((1 - x - y) * Y) / y);
+  }
+
+  static fromCCT(T: number) {
+    var x: number;
+    var y: number;
+
+    if (T <= 4000) {
+      x =
+        -0.2661239 * (1e9 / Math.pow(T, 3)) -
+        0.2343589 * (1e6 / Math.pow(T, 2)) +
+        0.8776956 * (1e3 / T) +
+        0.17991;
+
+      if (T <= 2222) {
+        y =
+          -1.1063814 * Math.pow(x, 3) -
+          1.3481102 * Math.pow(x, 2) +
+          2.18555832 * x -
+          0.20219683;
+      } else {
+        y =
+          -0.9549476 * Math.pow(x, 3) -
+          1.3481102 * Math.pow(x, 2) +
+          2.09137015 * x -
+          0.16748867;
+      }
+    } else {
+      x =
+        -3.0258469 * (1e9 / Math.pow(T, 3)) +
+        2.1070379 * (1e6 / Math.pow(T, 2)) +
+        0.2226347 * (1e3 / T) +
+        0.24039;
+
+      y =
+        3.081758 * Math.pow(x, 3) -
+        5.8733867 * Math.pow(x, 2) +
+        3.75112997 * x -
+        0.37001483;
+    }
+
+    return Color.fromXYY(x, y, 1);
+  }
+
   static chroma(hue: number, L: number = 75) {
     const a = 127 * Math.cos(2 * Math.PI * hue);
     const b = 127 * Math.sin(2 * Math.PI * hue);
