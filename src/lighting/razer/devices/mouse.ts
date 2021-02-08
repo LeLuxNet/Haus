@@ -117,4 +117,8 @@ export class RazerMouse extends RazerDevice {
       );
     }
   }
+
+  get type() {
+    return "mouse";
+  }
 }

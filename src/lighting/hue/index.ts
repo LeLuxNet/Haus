@@ -10,9 +10,13 @@ import { ColorState } from "../state";
 import { Home } from "../../server/home";
 import { search } from "../../ip/upnp";
 import { Logger } from "../../logger";
+import { Plug } from "../plug";
+import { Device } from "../../device";
+
+const maxBri = 254;
 
 const hueMult = 65535 / 360;
-const briMult = 254 / 255;
+const briMult = maxBri / 255;
 const satMult = 254 / 255;
 
 export class PhilipsHue extends Lighting {
@@ -35,47 +39,50 @@ export class PhilipsHue extends Lighting {
     const res = await this.api.get("lights");
     const lights = Object.entries<any>(res.data);
 
-    return lights.map(([id, data]) => {
-      const l: Light = new Light(
-        this.home.getDeviceId(this, data.uniqueid),
-        this,
-        new State({
-          initial: data.state.on,
-          get: () =>
-            this.api.get(`lights/${id}/state`).then((res) => res.data.on),
-          set: (val) => this.api.put(`lights/${id}/state`, { on: val }),
-        }),
-        new ColorState({
-          initial: Color.fromHSV(
-            res.data.hue / hueMult,
-            res.data.sat / satMult,
-            res.data.bri / briMult
-          ),
-          get: () =>
-            this.api
-              .get(`lights/${id}/state`)
-              .then((res) =>
-                Color.fromHSV(
-                  res.data.hue / hueMult,
-                  res.data.sat / satMult,
-                  res.data.bri / briMult
-                )
-              ),
-          set: (val) => {
-            const [h, s, v] = val.toHSV();
-            return this.api.put(`lights/${id}/state`, {
-              hue: Math.round(h * hueMult),
-              sat: Math.round(s * satMult),
-              bri: Math.round(v * briMult),
-            });
-          },
-        })
-      );
+    const devices = lights.map(([id, data]) => {
+      const did = this.home.getDeviceId(this, data.uniqueid);
 
-      l.name = data.name;
+      const on = new State({
+        initial: data.state.on,
+        get: () =>
+          this.api.get(`lights/${id}/state`).then((res) => res.data.on),
+        set: (val) => this.api.put(`lights/${id}/state`, { on: val }),
+      });
 
-      return l;
+      var d: Device;
+      if (data.state.bri === undefined) {
+        d = new Plug(did, this, on);
+      } else {
+        d = new Light(
+          did,
+          this,
+          on,
+          new ColorState({
+            initial: parseColor(data.state),
+            get: () =>
+              this.api
+                .get(`lights/${id}/state`)
+                .then((res) => parseColor(res.data)),
+            set: (val) => {
+              const [h, s, v] = val.toHSV();
+              return this.api.put(`lights/${id}/state`, {
+                hue: Math.round(h * hueMult),
+                sat: Math.round(s * satMult),
+                bri: Math.round(v * briMult),
+              });
+            },
+          })
+        );
+      }
+
+      d.name = data.name;
+      d.reachable = new State({ initial: data.config.reachable });
+
+      return d;
     });
+
+    this.logger.info(`Loaded ${devices.length} lights`);
+    return devices;
   }
 
   async allSensors() {
@@ -96,6 +103,9 @@ export class PhilipsHue extends Lighting {
       const s: Sensor =
         sensors.get(uid) || new Sensor(this.home.getDeviceId(this, uid), this);
 
+      s.reachable = new State({ initial: data.config.reachable });
+      s.battery = new State({ initial: data.config.battery });
+
       if (!data.name.startsWith(data.productname)) {
         s.name = data.name;
       }
@@ -106,7 +116,7 @@ export class PhilipsHue extends Lighting {
           get: () =>
             this.api
               .get(`sensors/${id}`)
-              .then((res) => res.data.state.lightlevel),
+              .then((res) => 10 ** ((res.data.state.lightlevel - 1) / 10000)),
           autoUpdate: UPDATE_SENSOR,
         });
       }
@@ -118,6 +128,17 @@ export class PhilipsHue extends Lighting {
             this.api
               .get(`sensors/${id}`)
               .then((res) => res.data.state.temperature / 100),
+          autoUpdate: UPDATE_SENSOR,
+        });
+      }
+
+      if (data.state.humidity !== undefined) {
+        s.temperature = new State<number>({
+          initial: data.state.humidity / 100,
+          get: () =>
+            this.api
+              .get(`sensors/${id}`)
+              .then((res) => res.data.state.humidity / 100),
           autoUpdate: UPDATE_SENSOR,
         });
       }
@@ -140,15 +161,34 @@ export class PhilipsHue extends Lighting {
       sensors.set(uid, s);
     }
 
-    return sensors.values();
+    const devices = Array.from(sensors.values());
+    this.logger.info(`Loaded ${devices.length} sensors`);
+    return devices;
   }
 
   async devices() {
-    const lights = await this.allLights();
-    const sensors = await this.allSensors();
+    const lights = this.allLights();
+    const sensors = this.allSensors();
 
-    return [...lights, ...sensors];
+    return [...(await lights), ...(await sensors)];
   }
+}
+
+function parseColor(state: any) {
+  if (state.hue !== undefined) {
+    return Color.fromHSV(
+      state.hue / hueMult,
+      state.sat / satMult,
+      state.bri / briMult
+    );
+  } else if (state.ct !== undefined) {
+    const c = Color.fromCCT(1e9 / state.ct);
+    c.y = state.bri / maxBri;
+    return c;
+  }
+
+  const bri = state.bri / briMult;
+  return Color.fromRGB(bri, bri, bri);
 }
 
 export async function create(

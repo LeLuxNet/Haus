@@ -35,4 +35,8 @@ export class RazerHeadset extends RazerDevice {
       },
     });
   }
+
+  get type() {
+    return "headset";
+  }
 }

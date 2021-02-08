@@ -33,4 +33,8 @@ export class RazerMousepad extends RazerDevice {
       );
     }
   }
+
+  get type() {
+    return "mousepad";
+  }
 }

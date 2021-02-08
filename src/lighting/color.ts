@@ -3,6 +3,18 @@ export class Color {
   y: number;
   z: number;
 
+  static xn = 0.950489;
+  static yn = 1;
+  static zn = 1.08884;
+
+  static get black() {
+    return new Color(0, 0, 0);
+  }
+
+  static get white() {
+    return new Color(Color.xn, Color.yn, Color.zn);
+  }
+
   constructor(x: number, y: number, z: number) {
     this.x = x;
     this.y = y;
@@ -71,9 +83,9 @@ export class Color {
 
     const m = (L + 16) / 116;
 
-    const x = 0.950489 * f(m + a / 500);
-    const y = f(m);
-    const z = 1.08884 * f(m - b / 200);
+    const x = Color.xn * f(m + a / 500);
+    const y = Color.yn * f(m);
+    const z = Color.zn * f(m - b / 200);
 
     return new Color(x, y, z);
   }

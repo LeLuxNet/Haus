@@ -37,12 +37,18 @@ export function createApi() {
 
   app.get("/home/:home/devices", (req, res) => {
     res.send(
-      req.home.devices.map((d) => {
-        return {
-          id: d.id,
-          name: d.name,
-        };
-      })
+      req.home.devices
+        .filter((d) => d !== undefined)
+        .map((d) => {
+          return {
+            id: d.id,
+            name: d.name,
+            data: d.data,
+
+            reachable: d.reachable?.last,
+            battery: d.battery?.last,
+          };
+        })
     );
   });
 

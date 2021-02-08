@@ -317,4 +317,8 @@ export class RazerKeyboard extends RazerDevice {
   private keyColor(name: string) {
     return toRzColor(this.keyMap.get(name)?.last);
   }
+
+  get type() {
+    return "keyboard";
+  }
 }

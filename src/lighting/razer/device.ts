@@ -2,7 +2,7 @@ import { Razer } from ".";
 import { Device } from "../../device";
 import { Update } from "../../update";
 
-export class RazerDevice extends Device {
+export abstract class RazerDevice extends Device {
   razer: Razer;
 
   update: Update;

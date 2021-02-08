@@ -33,4 +33,8 @@ export class RazerKeypad extends RazerDevice {
       this.keys.push(row);
     }
   }
+
+  get type() {
+    return "keypad";
+  }
 }
