@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from "axios";
 import { AUTHOR, AUTHOR_LINK, NAME } from "../../const";
+import { Logger } from "../../logger";
 import { Home } from "../../server/home";
 import { Color } from "../color";
 import { Lighting } from "../lighting";
@@ -20,8 +21,8 @@ export class Razer extends Lighting {
   mousepad: RazerMousepad;
   mouse: RazerMouse;
 
-  constructor(host: string, id: string, home: Home) {
-    super(id, home);
+  constructor(host: string, id: string, home: Home, logger: Logger) {
+    super(id, home, logger);
     this.api = axios.create({
       baseURL: host,
     });
@@ -67,7 +68,7 @@ export function toRzColor(color?: Color) {
   return (b << 16) + (g << 8) + r;
 }
 
-export async function create({}, id: string, home: Home) {
+export async function create({}, id: string, home: Home, logger: Logger) {
   const res = await axios.post("http://localhost:54235/razer/chromasdk", {
     title: NAME,
     description: " ",
@@ -79,5 +80,5 @@ export async function create({}, id: string, home: Home) {
     category: "application",
   });
 
-  return new Razer(res.data.uri, id, home);
+  return new Razer(res.data.uri, id, home, logger);
 }

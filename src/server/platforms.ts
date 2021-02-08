@@ -15,5 +15,5 @@ export async function createPlatform(
   const plugin = plugins[data.type];
   if (plugin === undefined || plugin.import === undefined) return undefined;
 
-  return plugin.import.create(data, id, home);
+  return plugin.import.create(data, id, home, plugin.logger!);
 }

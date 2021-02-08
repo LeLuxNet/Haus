@@ -9,6 +9,7 @@ import { HueButton } from "./button";
 import { ColorState } from "../state";
 import { Home } from "../../server/home";
 import { search } from "../../ip/upnp";
+import { Logger } from "../../logger";
 
 const hueMult = 65535 / 360;
 const briMult = 254 / 255;
@@ -17,8 +18,14 @@ const satMult = 254 / 255;
 export class PhilipsHue extends Lighting {
   api: AxiosInstance;
 
-  constructor(host: string, key: string, id: string, home: Home) {
-    super(id, home);
+  constructor(
+    host: string,
+    key: string,
+    id: string,
+    home: Home,
+    logger: Logger
+  ) {
+    super(id, home, logger);
     this.api = axios.create({
       baseURL: `${host}/api/${key}`,
     });
@@ -147,7 +154,8 @@ export class PhilipsHue extends Lighting {
 export async function create(
   { host, key }: { host: string; key?: string },
   id: string,
-  home: Home
+  home: Home,
+  logger: Logger
 ) {
   if (key === undefined) {
     const res = await axios.post(`${host}/api`, {
@@ -166,10 +174,10 @@ export async function create(
     }
   }
 
-  return new PhilipsHue(host, key, id, home);
+  return new PhilipsHue(host, key, id, home, logger);
 }
 
-export async function discover(stealth: boolean) {
+export async function discover(stealth: boolean, logger: Logger) {
   const ips: string[] = [];
 
   const upnp = search("urn:schemas-upnp-org:device:Basic:1").then((res) => {

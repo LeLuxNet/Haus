@@ -1,6 +1,7 @@
 import axios, { AxiosError, AxiosInstance } from "axios";
 import { config } from "process";
 import { strategy } from "sharp";
+import { Logger } from "../../logger";
 import { Home } from "../../server/home";
 import { State } from "../../state";
 import { Color } from "../color";
@@ -19,8 +20,14 @@ class Nanoleaf extends Lighting {
 
   global: Light;
 
-  constructor(host: string, key: string, id: string, home: Home) {
-    super(id, home);
+  constructor(
+    host: string,
+    key: string,
+    id: string,
+    home: Home,
+    logger: Logger
+  ) {
+    super(id, home, logger);
     this.api = axios.create({
       baseURL: `${host}/api/v1/${key}`,
     });
@@ -94,12 +101,13 @@ class Nanoleaf extends Lighting {
 export async function create(
   { host, key }: { host: string; key?: string },
   id: string,
-  home: Home
+  home: Home,
+  logger: Logger
 ) {
   if (key === undefined) {
     const res = await axios.post(`${host}/api/v1/new`);
     key = res.data.auth_token as string;
   }
 
-  return new Nanoleaf(host, key, id, home);
+  return new Nanoleaf(host, key, id, home, logger);
 }

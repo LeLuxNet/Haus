@@ -1,27 +1,41 @@
 import { constants } from "fs";
 import { access } from "fs/promises";
 import { join } from "path";
+import { Logger } from "../logger";
 import { Platform } from "../platform";
 import { Home } from "./home";
 
 export interface PluginFile {
-  create: (data: any, id: string, home: Home) => Promise<Platform | undefined>;
-  discover?: (stealth: boolean) => Promise<string[]>;
+  create: (
+    data: any,
+    id: string,
+    home: Home,
+    logger: Logger
+  ) => Promise<Platform | undefined>;
+  discover?: (stealth: boolean, logger: Logger) => Promise<string[]>;
+}
+
+interface Plugin {
+  name: string;
+  file: string;
+
+  import?: PluginFile;
+  logger?: Logger;
 }
 
 export const plugins: {
-  [key: string]: {
-    file: string;
-    import?: PluginFile;
-  };
+  [key: string]: Plugin;
 } = {
   "philips-hue": {
+    name: "Philips Hue",
     file: "lighting/hue",
   },
   razer: {
+    name: "Razer",
     file: "lighting/razer",
   },
   nanoleaf: {
+    name: "Nanoleaf",
     file: "lighting/nanoleaf",
   },
 };
@@ -36,12 +50,11 @@ export async function loadPlugins() {
 
       if (exists) {
         const plugin: PluginFile = await import(path);
-        if (plugin.create === undefined) {
-          console.warn(`'${type}' has no create function`);
-          return;
-        }
 
-        console.log(`Imported '${type}'`);
+        const logger = new Logger(data.name);
+        logger.debug("Loaded");
+        data.logger = logger;
+
         data.import = plugin;
       }
     })
