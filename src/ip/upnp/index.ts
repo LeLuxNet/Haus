@@ -1,50 +1,58 @@
 import { createSocket, Socket } from "dgram";
-import { networkInterfaces } from "os";
-import { NAME } from "../../const";
+import { EventEmitter } from "events";
 
 const ip = "239.255.255.250";
 const port = 1900;
 
-export class UPnPClient {
-  sockets: [string, Socket][] = [];
+interface Headers {
+  [key: string]: string;
+}
+const _event = new EventEmitter();
 
-  constructor() {
-    const ifaces = networkInterfaces();
-    for (const [name, info] of Object.entries(ifaces)) {
-      if (info === undefined) continue;
+const socket = createSocket("udp4");
+socket.on("message", (chunk, info) => {
+  const msg = chunk.toString().split("\r\n");
 
-      info.forEach((val) => {
-        if (!val.internal && val.family === "IPv4") {
-          const socket = createSocket("udp4");
-          socket.on("message", (chunk, info) => {
-            console.log(chunk, info);
-          });
+  const http = msg.shift();
+  if (http === undefined || !http.startsWith("HTTP/")) return;
 
-          this.sockets.push([val.address, socket]);
-        }
-      });
-    }
-  }
+  const headers: Headers = {};
+  msg.forEach((m) => {
+    const index = m.indexOf(":");
+    if (index === -1) return;
 
-  search(target: string = "ssdp:all") {
-    this.sockets.forEach(([address, socket]) => {
-      socket.bind(0, address, () => {
-        socket.addMembership(ip, address);
-        socket.setMulticastTTL(4);
+    headers[m.slice(0, index).toLowerCase()] = m.slice(index + 1).trim();
+  });
 
-        const pkt = Buffer.from(
-          buildPacket({
-            HOST: `${ip}:${port}`,
-            MAN: '"ssdp:discover"',
-            MX: 1,
-            ST: target,
-          })
-        );
+  _event.emit("data", headers);
+});
 
-        socket.send(pkt, 0, pkt.length, port, ip);
-      });
+export async function search(target: string = "ssdp:all") {
+  const time = 3;
+
+  const res: Headers[] = [];
+  socket.bind(() => {
+    const pkt = Buffer.from(
+      buildPacket({
+        HOST: `${ip}:${port}`,
+        MAN: '"ssdp:discover"',
+        MX: time,
+        ST: target,
+      })
+    );
+
+    _event.on("data", (headers) => {
+      if (target === "ssdp:all" || headers.st === target) {
+        res.push(headers);
+      }
     });
-  }
+
+    socket.send(pkt, 0, pkt.length, port, ip);
+  });
+
+  return new Promise<Headers[]>((resolve) => {
+    setTimeout(() => resolve(res), 1000 * time);
+  });
 }
 
 function buildPacket(data: { [key: string]: any }) {

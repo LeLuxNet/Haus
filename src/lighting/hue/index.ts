@@ -8,6 +8,7 @@ import { Color } from "../color";
 import { HueButton } from "./button";
 import { ColorState } from "../state";
 import { Home } from "../../server/home";
+import { search } from "../../ip/upnp";
 
 const hueMult = 65535 / 360;
 const briMult = 254 / 255;
@@ -43,11 +44,22 @@ export class PhilipsHue extends Lighting {
   static async discover(stealth: boolean = false) {
     const ips: string[] = [];
 
+    const upnp = search("urn:schemas-upnp-org:device:Basic:1").then((res) => {
+      res.forEach((data) => {
+        const id = data["hue-bridgeid"];
+        if (id !== undefined) {
+          const ip = new URL(data.location).host;
+          ips.push(ip);
+        }
+      });
+    });
+
     if (!stealth) {
       const res = await axios.get("https://discovery.meethue.com");
       res.data.forEach((e: any) => ips.push(e.internalipaddress));
     }
 
+    await upnp;
     return ips;
   }
 
