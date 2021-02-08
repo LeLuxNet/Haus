@@ -44,21 +44,6 @@ export class Razer extends Lighting {
     this.mouse = new RazerMouse(this);
   }
 
-  static async create(id: string, home: Home) {
-    const res = await axios.post("http://localhost:54235/razer/chromasdk", {
-      title: NAME,
-      description: " ",
-      author: {
-        name: AUTHOR,
-        contact: AUTHOR_LINK,
-      },
-      device_supported: ["headset", "keyboard", "keypad", "mouse", "mousepad"],
-      category: "application",
-    });
-
-    return new Razer(res.data.uri, id, home);
-  }
-
   async devices() {
     return [
       this.headset,
@@ -80,4 +65,19 @@ export function toRzColor(color?: Color) {
 
   const [r, g, b] = color.toRGB();
   return (b << 16) + (g << 8) + r;
+}
+
+export async function create({}, id: string, home: Home) {
+  const res = await axios.post("http://localhost:54235/razer/chromasdk", {
+    title: NAME,
+    description: " ",
+    author: {
+      name: AUTHOR,
+      contact: AUTHOR_LINK,
+    },
+    device_supported: ["headset", "keyboard", "keypad", "mouse", "mousepad"],
+    category: "application",
+  });
+
+  return new Razer(res.data.uri, id, home);
 }

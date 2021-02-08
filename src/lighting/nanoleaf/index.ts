@@ -1,5 +1,6 @@
 import axios, { AxiosError, AxiosInstance } from "axios";
 import { config } from "process";
+import { strategy } from "sharp";
 import { Home } from "../../server/home";
 import { State } from "../../state";
 import { Color } from "../color";
@@ -13,7 +14,7 @@ const satMult = 100 / 255;
 const sizeMult = 0.24;
 
 // https://forum.nanoleaf.me/docs
-export class Nanoleaf extends Lighting {
+class Nanoleaf extends Lighting {
   api: AxiosInstance;
 
   global: Light;
@@ -85,13 +86,20 @@ export class Nanoleaf extends Lighting {
     );
   }
 
-  static async link(host: string, id: string, home: Home) {
-    const res = await axios.post(`${host}/api/v1/new`);
-
-    return new Nanoleaf(host, res.data.auth_token, id, home);
-  }
-
   async devices() {
     return [this.global];
   }
+}
+
+export async function create(
+  { host, key }: { host: string; key?: string },
+  id: string,
+  home: Home
+) {
+  if (key === undefined) {
+    const res = await axios.post(`${host}/api/v1/new`);
+    key = res.data.auth_token as string;
+  }
+
+  return new Nanoleaf(host, key, id, home);
 }

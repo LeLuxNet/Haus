@@ -24,45 +24,6 @@ export class PhilipsHue extends Lighting {
     });
   }
 
-  static async link(host: string, id: string, home: Home) {
-    const res = await axios.post(`${host}/api`, {
-      devicetype: NAME.toLowerCase(),
-    });
-    const data = res.data[0];
-
-    if (data.error !== undefined) {
-      if (data.error.type === 101) {
-        return undefined;
-      } else {
-        throw data.error.description;
-      }
-    } else {
-      return new PhilipsHue(host, data.success.username, id, home);
-    }
-  }
-
-  static async discover(stealth: boolean = false) {
-    const ips: string[] = [];
-
-    const upnp = search("urn:schemas-upnp-org:device:Basic:1").then((res) => {
-      res.forEach((data) => {
-        const id = data["hue-bridgeid"];
-        if (id !== undefined) {
-          const ip = new URL(data.location).host;
-          ips.push(ip);
-        }
-      });
-    });
-
-    if (!stealth) {
-      const res = await axios.get("https://discovery.meethue.com");
-      res.data.forEach((e: any) => ips.push(e.internalipaddress));
-    }
-
-    await upnp;
-    return ips;
-  }
-
   async allLights() {
     const res = await this.api.get("lights");
     const lights = Object.entries<any>(res.data);
@@ -181,4 +142,51 @@ export class PhilipsHue extends Lighting {
 
     return [...lights, ...sensors];
   }
+}
+
+export async function create(
+  { host, key }: { host: string; key?: string },
+  id: string,
+  home: Home
+) {
+  if (key === undefined) {
+    const res = await axios.post(`${host}/api`, {
+      devicetype: NAME.toLowerCase(),
+    });
+    const data = res.data[0];
+
+    if (data.error !== undefined) {
+      if (data.error.type === 101) {
+        return undefined;
+      } else {
+        throw data.error.description;
+      }
+    } else {
+      key = data.success.username as string;
+    }
+  }
+
+  return new PhilipsHue(host, key, id, home);
+}
+
+export async function discover(stealth: boolean) {
+  const ips: string[] = [];
+
+  const upnp = search("urn:schemas-upnp-org:device:Basic:1").then((res) => {
+    res.forEach((data) => {
+      const id = data["hue-bridgeid"];
+      if (id !== undefined) {
+        const ip = new URL(data.location).host;
+        ips.push(ip);
+      }
+    });
+  });
+
+  if (!stealth) {
+    const res = await axios.get("https://discovery.meethue.com");
+    res.data.forEach((e: any) => ips.push(e.internalipaddress));
+  }
+
+  await upnp;
+  return ips;
 }
