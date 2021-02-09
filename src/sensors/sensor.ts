@@ -8,17 +8,19 @@ export class Sensor extends Device {
   lightlevel?: State<number>;
   temperature?: State<number>;
   humidity?: State<number>;
+
   button?: Trigger<Press>;
 
   get type() {
     return "sensor";
   }
 
-  get data() {
+  get values() {
     return {
-      presence: this.presence?.last,
-      lightlevel: this.lightlevel?.last,
-      temperature: this.temperature?.last,
+      presence: this.presence,
+      lightlevel: this.lightlevel,
+      temperature: this.temperature,
+      humidity: this.humidity,
     };
   }
 }

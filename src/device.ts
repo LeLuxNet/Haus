@@ -16,7 +16,5 @@ export abstract class Device {
 
   abstract get type(): string;
 
-  get data() {
-    return {};
-  }
+  abstract get values(): { [key: string]: State<any> | undefined };
 }

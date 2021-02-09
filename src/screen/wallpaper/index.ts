@@ -5,12 +5,19 @@ import { Platform } from "../../platform";
 import { Screen } from "../screen";
 import fs from "fs";
 import { Home } from "../../server/home";
+import { Logger } from "../../logger";
 
 export class Wallpaper extends Platform {
   image: Screen;
 
-  constructor(id: string, home: Home, width: number, height: number) {
-    super(id, home);
+  constructor(
+    width: number,
+    height: number,
+    id: string,
+    home: Home,
+    logger: Logger
+  ) {
+    super(id, home, logger);
     this.image = new Screen(
       this.home.getDeviceId(this),
       this,

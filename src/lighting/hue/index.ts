@@ -167,10 +167,10 @@ export class PhilipsHue extends Lighting {
   }
 
   async devices() {
-    const lights = this.allLights();
-    const sensors = this.allSensors();
+    const lights = await this.allLights();
+    const sensors = await this.allSensors();
 
-    return [...(await lights), ...(await sensors)];
+    return [...lights, ...sensors];
   }
 }
 

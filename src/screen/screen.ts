@@ -40,4 +40,12 @@ export class Screen extends Device {
     this.pixels.forEach((row, x) => row.forEach((s, y) => (s.last = fn(x, y))));
     this.update();
   }
+
+  get type() {
+    return "screen";
+  }
+
+  get values() {
+    return {};
+  }
 }

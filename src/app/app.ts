@@ -4,7 +4,7 @@ import { startServer } from "../server";
 
 const web = path.join(__dirname, "../../web");
 
-startServer(31313);
+startServer("31313");
 
 function createWindow() {
   const mainWindow = new BrowserWindow({

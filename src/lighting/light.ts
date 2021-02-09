@@ -24,16 +24,10 @@ export class Light extends Device {
     return "light";
   }
 
-  get data() {
-    const data: any = {
-      on: this.on.last,
+  get values() {
+    return {
+      on: this.on,
+      color: this.color,
     };
-
-    if (this.color.last !== undefined) {
-      const [r, g, b] = this.color.last.toRGB();
-      data.color = { r, g, b };
-    }
-
-    return data;
   }
 }

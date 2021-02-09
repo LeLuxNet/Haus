@@ -12,4 +12,8 @@ export abstract class RazerDevice extends Device {
     this.razer = razer;
     this.update = new Update(fun);
   }
+
+  get values() {
+    return {};
+  }
 }

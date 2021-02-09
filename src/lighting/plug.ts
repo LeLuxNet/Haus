@@ -14,9 +14,9 @@ export class Plug extends Device {
     return "plug";
   }
 
-  get data() {
+  get values() {
     return {
-      on: this.on.last,
+      on: this.on,
     };
   }
 }
