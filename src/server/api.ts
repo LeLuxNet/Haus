@@ -57,10 +57,12 @@ export function createApi() {
     return {
       id: d.id,
       name: d.name,
-      data: vals,
+      type: d.type,
 
       reachable: d.reachable?.last,
       battery: d.battery?.last,
+
+      data: vals,
     };
   }
 

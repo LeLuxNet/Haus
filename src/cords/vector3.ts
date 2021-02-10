@@ -1,10 +1,12 @@
-export class Vector2 {
+export class Vector3 {
   x: number;
   y: number;
+  z: number;
 
-  constructor(x: number, y: number) {
+  constructor(x: number, y: number, z: number) {
     this.x = x;
     this.y = y;
+    this.z = z;
   }
 
   get magnitude() {
@@ -12,16 +14,16 @@ export class Vector2 {
   }
 
   get sqrMagnitude() {
-    return Math.pow(this.x, 2) + Math.pow(this.y, 2);
+    return Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2);
   }
 
-  subtract(other: Vector2) {
-    return new Vector2(this.x - other.x, this.y - other.y);
+  subtract(other: Vector3) {
+    return new Vector3(this.x - other.x, this.y - other.y, this.z - other.z);
   }
 
-  nearestPoint(list: [Vector2, ...Vector2[]]) {
+  nearestPoint(list: [Vector3, ...Vector3[]]) {
     var distance = Infinity;
-    var point: Vector2 | undefined;
+    var point: Vector3 | undefined;
 
     list.forEach((v) => {
       const d = this.subtract(v).sqrMagnitude;

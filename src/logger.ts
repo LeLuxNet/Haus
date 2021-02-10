@@ -14,8 +14,6 @@ export class Logger {
   }
 
   _prefix(level: string, code: number) {
-    // const date = new Date().toISOString().replace("T", " ").split(".")[0];
-
     var prefix = `${color(code)}${level}${color(0)}: `;
     if (this.name.length !== 0) {
       prefix += `${color(90)}[${this.name}]${color(0)} `;

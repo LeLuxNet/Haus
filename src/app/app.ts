@@ -2,8 +2,6 @@ import { app, BrowserWindow } from "electron";
 import path from "path";
 import { startServer } from "../server";
 
-const web = path.join(__dirname, "../../web");
-
 startServer("31313");
 
 function createWindow() {
@@ -15,7 +13,7 @@ function createWindow() {
     },
   });
 
-  mainWindow.loadFile(path.join(web, "index.html"));
+  mainWindow.loadFile(path.join(__dirname, "../../web/index.html"));
 
   // mainWindow.webContents.openDevTools();
 }

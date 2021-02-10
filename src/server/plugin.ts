@@ -1,5 +1,4 @@
-import { constants } from "fs";
-import { access } from "fs/promises";
+import { constants, promises } from "fs";
 import { join } from "path";
 import { Logger } from "../logger";
 import { Platform } from "../platform";
@@ -44,7 +43,8 @@ export async function loadPlugins() {
   await Promise.all(
     Object.entries(plugins).map(async ([type, data]) => {
       const path = join("..", data.file);
-      const exists = access(path, constants.F_OK)
+      const exists = promises
+        .access(path, constants.F_OK)
         .then(() => true)
         .catch(() => false);
 
