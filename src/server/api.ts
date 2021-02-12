@@ -48,8 +48,9 @@ export function createApi() {
     Object.keys(vals).map((key) => {
       var val = vals[key]?.last;
       if (val instanceof Color) {
+        const [h, s, v] = val.toHSV();
         const [r, g, b] = val.toRGB();
-        val = { r, g, b };
+        val = { r, g, b, h, s, v };
       }
       vals[key] = val;
     });

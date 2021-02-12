@@ -10,7 +10,7 @@ import { ColorState } from "../state";
 import { Home } from "../../server/home";
 import { search } from "../../ip/upnp";
 import { Logger } from "../../logger";
-import { Plug } from "../plug";
+import { Outlet } from "../outlet";
 import { Device } from "../../device";
 
 const maxBri = 254;
@@ -51,7 +51,7 @@ export class PhilipsHue extends Lighting {
 
       var d: Device;
       if (data.state.bri === undefined) {
-        d = new Plug(did, this, on);
+        d = new Outlet(did, this, on);
       } else {
         d = new Light(
           did,
@@ -111,7 +111,7 @@ export class PhilipsHue extends Lighting {
       }
 
       if (data.state.lightlevel !== undefined) {
-        s.lightlevel = new State({
+        s.illuminance = new State({
           initial: data.state.lightlevel,
           get: () =>
             this.api

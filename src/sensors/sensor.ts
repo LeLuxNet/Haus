@@ -5,9 +5,9 @@ import { Press } from "./button";
 
 export class Sensor extends Device {
   presence?: State<boolean>;
-  lightlevel?: State<number>;
-  temperature?: State<number>;
-  humidity?: State<number>;
+  illuminance?: State<number>; // lux
+  temperature?: State<number>; // °C
+  humidity?: State<number>; // %
 
   button?: Trigger<Press>;
 
@@ -18,7 +18,7 @@ export class Sensor extends Device {
   get values() {
     return {
       presence: this.presence,
-      lightlevel: this.lightlevel,
+      illuminance: this.illuminance,
       temperature: this.temperature,
       humidity: this.humidity,
     };

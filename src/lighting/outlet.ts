@@ -2,7 +2,7 @@ import { Device } from "../device";
 import { Platform } from "../platform";
 import { State } from "../state";
 
-export class Plug extends Device {
+export class Outlet extends Device {
   on: State<boolean>;
 
   constructor(id: number, platform: Platform, on: State<boolean>) {
@@ -11,7 +11,7 @@ export class Plug extends Device {
   }
 
   get type() {
-    return "plug";
+    return "outlet";
   }
 
   get values() {
