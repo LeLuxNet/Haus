@@ -3,7 +3,12 @@ import { Lighting } from "../lighting";
 import { Light } from "../light";
 import { State } from "../../state";
 import { Sensor } from "../../sensors/sensor";
-import { NAME, UPDATE_PRESENCE, UPDATE_SENSOR } from "../../const";
+import {
+  NAME,
+  UPDATE_LIGHT,
+  UPDATE_PRESENCE,
+  UPDATE_SENSOR,
+} from "../../const";
 import { Color } from "../color";
 import { HueButton } from "./button";
 import { ColorState } from "../state";
@@ -45,8 +50,9 @@ export class PhilipsHue extends Lighting {
       const on = new State({
         initial: data.state.on,
         get: () =>
-          this.api.get(`lights/${id}/state`).then((res) => res.data.on),
+          this.api.get(`lights/${id}`).then((res) => res.data.state.on),
         set: (val) => this.api.put(`lights/${id}/state`, { on: val }),
+        autoUpdate: UPDATE_LIGHT,
       });
 
       var d: Device;
@@ -61,8 +67,8 @@ export class PhilipsHue extends Lighting {
             initial: parseColor(data.state),
             get: () =>
               this.api
-                .get(`lights/${id}/state`)
-                .then((res) => parseColor(res.data)),
+                .get(`lights/${id}`)
+                .then((res) => parseColor(res.data.state)),
             set: (val) => {
               const [h, s, v] = val.toHSV();
               return this.api.put(`lights/${id}/state`, {
@@ -71,6 +77,7 @@ export class PhilipsHue extends Lighting {
                 bri: Math.round(v * briMult),
               });
             },
+            autoUpdate: UPDATE_LIGHT,
           })
         );
       }

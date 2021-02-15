@@ -1,8 +1,12 @@
 import express from "express";
+import { createServer, Server } from "http";
 import { Device } from "../device";
 import { Color } from "../lighting/color";
-import { ColorState } from "../lighting/state";
 import { Home, homes } from "./home";
+import { server as WebSocketServer } from "websocket";
+import { verifyAuth } from "./auth";
+import { Trigger } from "../trigger";
+import { State } from "../state";
 
 declare global {
   namespace Express {
@@ -13,8 +17,27 @@ declare global {
   }
 }
 
+function deviceData(d: Device) {
+  const vals = d.values;
+  Object.keys(vals).map((key) => State.toJSON(vals[key]?.last));
+
+  return {
+    id: d.id,
+    name: d.name,
+    type: d.type,
+
+    reachable: d.reachable?.last,
+    battery: d.battery?.last,
+
+    data: vals,
+  };
+}
+
 export function createApi() {
   const app = express();
+  const server = createServer(app);
+
+  createWebSocket(server);
 
   app.use(express.json());
 
@@ -26,7 +49,11 @@ export function createApi() {
       return;
     }
 
-    // TODO: Authentication
+    const auth = verifyAuth(req.headers.authorization);
+    if (auth !== 0) {
+      res.sendStatus(auth);
+      return;
+    }
 
     req.home = home;
     next();
@@ -42,30 +69,6 @@ export function createApi() {
   app.get("/home/:home/devices", (req, res) => {
     res.send(req.home.devices.filter((d) => d !== undefined).map(deviceData));
   });
-
-  function deviceData(d: Device) {
-    const vals = d.values;
-    Object.keys(vals).map((key) => {
-      var val = vals[key]?.last;
-      if (val instanceof Color) {
-        const [h, s, v] = val.toHSV();
-        const [r, g, b] = val.toRGB();
-        val = { r, g, b, h, s, v };
-      }
-      vals[key] = val;
-    });
-
-    return {
-      id: d.id,
-      name: d.name,
-      type: d.type,
-
-      reachable: d.reachable?.last,
-      battery: d.battery?.last,
-
-      data: vals,
-    };
-  }
 
   app.param("device", (req, res, next, id) => {
     const device = req.home.devices[id];
@@ -99,5 +102,65 @@ export function createApi() {
     res.send(deviceData(req.device));
   });
 
-  return app;
+  return server;
+}
+
+function createWebSocket(server: Server) {
+  const ws = new WebSocketServer({
+    httpServer: server,
+    autoAcceptConnections: false,
+  });
+
+  ws.on("request", (req) => {
+    var auth: number | undefined;
+
+    if (
+      req.resourceURL.query !== null &&
+      typeof req.resourceURL.query !== "string"
+    ) {
+      const query = req.resourceURL.query["auth"];
+      if (typeof query !== "object") {
+        auth = verifyAuth(query);
+      }
+    }
+
+    if (auth === undefined) {
+      auth = verifyAuth();
+    }
+    if (auth !== 0) {
+      req.reject(auth);
+      return;
+    }
+
+    const conn = req.accept("echo-protocol", req.origin);
+
+    const subs: (() => void)[] = [];
+
+    conn.on("message", (msg) => {
+      if (msg.utf8Data !== undefined) {
+        const raw = JSON.parse(msg.utf8Data);
+        const data = raw[1];
+        console.log(raw);
+
+        switch (raw[0]) {
+          case "sub":
+            const home = homes.get(data.home);
+            if (home === undefined) return;
+
+            if (data.device === undefined) {
+              const fn = (val: any) => conn.send(JSON.stringify(val));
+              home.subscribe(fn, conn);
+            } else {
+            }
+
+            break;
+        }
+      }
+    });
+
+    conn.on("close", (reason, desc) => {
+      subs.forEach((fn) => fn());
+      console.log("Disconnected", reason, desc);
+    });
+  });
 }

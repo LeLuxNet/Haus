@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "es6",
     "module": "commonjs",
-    "lib": ["es6", "dom"],
+    "lib": ["es2019", "dom"],
     "outDir": "dist",
     "rootDir": "src",
     "moduleResolution": "node",
@@ -18,7 +18,8 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "typeRoots": ["typings", "node_modules/@types"]
   },
   "exclude": ["web"]
 }

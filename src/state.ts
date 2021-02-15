@@ -1,4 +1,4 @@
-import { EventEmitter } from "events";
+import { Color } from "./lighting/color";
 import { Trigger } from "./trigger";
 
 type Get<T> = () => Promise<T>;
@@ -38,7 +38,7 @@ export class State<T> extends Trigger<T> {
         this.get();
       }
 
-      if (this.subscribers.length < 0 && this.autoUpdate !== undefined) {
+      if (this.subscriptions.length < 0 && this.autoUpdate !== undefined) {
         this._autoUpdateInterval = setInterval(
           this.get,
           this.autoUpdate * 1000
@@ -71,13 +71,13 @@ export class State<T> extends Trigger<T> {
   }
 
   update(value: T) {
-    if (this.last !== value) {
+    if (!State.equal(this.last, value)) {
       this.last = value;
       this.trigger(value);
     }
   }
 
-  subscribe(fn: (val: T) => void) {
+  subscribe(fn: (val: T) => void, anchor: any) {
     if (
       this._autoUpdateInterval === undefined &&
       this.autoUpdate !== undefined &&
@@ -86,18 +86,31 @@ export class State<T> extends Trigger<T> {
       this._autoUpdateInterval = setInterval(this.get, this.autoUpdate * 1000);
     }
 
-    super.subscribe(fn);
+    const unsub = super.subscribe(fn, anchor);
+    return () => {
+      unsub();
+
+      if (
+        this._autoUpdateInterval !== undefined &&
+        this.subscriptions.length === 0
+      ) {
+        clearInterval(this._autoUpdateInterval);
+        this._autoUpdateInterval = undefined;
+      }
+    };
   }
 
-  unsubscripe(fn: (val: T) => void) {
-    super.unsubscribe(fn);
-
-    if (
-      this._autoUpdateInterval !== undefined &&
-      this.subscribers.length === 0
-    ) {
-      clearInterval(this._autoUpdateInterval);
-      this._autoUpdateInterval = undefined;
+  static toJSON(data: any) {
+    if (data instanceof Color) {
+      return data.toJSON();
     }
+    return data;
+  }
+
+  static equal(a: any, b: any) {
+    if (a instanceof Color && b instanceof Color) {
+      return a.x === b.x && a.y === b.y && a.z === b.z;
+    }
+    return a === b;
   }
 }

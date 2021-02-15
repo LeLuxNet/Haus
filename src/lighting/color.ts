@@ -202,4 +202,10 @@ export class Color {
     const [r, g, b] = this.toRGB();
     return "#" + [r, g, b].map((x) => x.toString(16).padStart(2, "0")).join("");
   }
+
+  toJSON() {
+    const [r, g, b] = this.toRGB();
+    const [h, s, v] = this.toHSV();
+    return { r, g, b, h, s, v };
+  }
 }
