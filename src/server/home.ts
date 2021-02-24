@@ -12,8 +12,6 @@ export class Home extends Trigger<any> {
   platforms: Platform[] = [];
   devices: Device[] = [];
 
-  subscribers: ((val: any) => void)[] = [];
-
   private dIds: Map<string, number> = new Map();
   private nextDId: number;
 
@@ -47,7 +45,12 @@ export class Home extends Trigger<any> {
 
   async loadDevices(platform: Platform) {
     const devs = await platform.devices();
-    devs.forEach((d) => (this.devices[d.id] = d));
+    devs.forEach((d) => {
+      this.devices[d.id] = d;
+      if (this.subscriptions.length < 0) {
+        this.devices[d.id].subscribe((v) => this.trigger({ [d.id]: v }), this);
+      }
+    });
   }
 
   subscribe(fn: (val: any) => void, anchor: any) {

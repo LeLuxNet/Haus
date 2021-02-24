@@ -1,6 +1,9 @@
 import { PRODUCTION } from "./const";
 
+const noColor = false;
+
 function color(code: number) {
+  if (noColor) return "";
   return `\x1b[${code}m`;
 }
 
