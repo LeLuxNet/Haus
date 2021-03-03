@@ -1,9 +1,15 @@
 import axios from "axios";
 import { load } from "cheerio";
-import sharp from "sharp";
 import { URLSearchParams } from "url";
-import { ShipmentStatus, ShipmentEntry, Shipment } from "../entry";
+import { Shipment, ShipmentEntry, ShipmentStatus } from "../entry";
 import { ShippingService } from "../service";
+
+const states: { [key: string]: ShipmentStatus } = {
+  Processing: ShipmentStatus.processing,
+  Transit: ShipmentStatus.transit,
+  Returned: ShipmentStatus.returned,
+  Delivered: ShipmentStatus.delivered,
+};
 
 export class YunTrack extends ShippingService {
   async getCode(): Promise<string> {
@@ -60,13 +66,6 @@ export class YunTrack extends ShippingService {
     return $(".T_item")
       .map(
         (_, e): Shipment => {
-          const states: { [key: string]: ShipmentStatus } = {
-            Processing: ShipmentStatus.processing,
-            Transit: ShipmentStatus.transit,
-            Returned: ShipmentStatus.returned,
-            Delivered: ShipmentStatus.delivered,
-          };
-
           const entries: ShipmentEntry[] = $(e)
             .find("li")
             .map(

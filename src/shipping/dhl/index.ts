@@ -2,6 +2,8 @@ import axios from "axios";
 import { Shipment, ShipmentEntry, ShipmentStatus } from "../entry";
 import { ShippingService } from "../service";
 
+const key = "demo-key";
+
 export class DHL extends ShippingService {
   async update() {
     return await Promise.all(
@@ -10,12 +12,8 @@ export class DHL extends ShippingService {
           const res = await axios.get(
             "https://api-eu.dhl.com/track/shipments",
             {
-              params: {
-                trackingNumber: c,
-              },
-              headers: {
-                "DHL-API-Key": "demo-key",
-              },
+              params: { trackingNumber: c },
+              headers: { "DHL-API-Key": key },
             }
           );
           const data = res.data.shipments[0];
