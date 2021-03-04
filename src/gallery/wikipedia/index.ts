@@ -1,9 +1,9 @@
 import axios from "axios";
-import { load } from "cheerio";
 import { Gallery } from "../gallery";
+import { imageUrl } from "../wikimedia";
 
 const api = axios.create({
-  baseURL: "https://commons.wikimedia.org/w/api.php",
+  baseURL: "https://en.wikipedia.org/w/api.php",
   params: {
     format: "json",
   },
@@ -13,9 +13,10 @@ export class Wikipedia extends Gallery {
   async load() {
     const res = api.get("", {
       params: {
-        action: "parse",
-        contentmodel: "wikitext",
-        text: "{{Potd/{{CURRENTYEAR}}-{{CURRENTMONTH}}-{{CURRENTDAY2}} (en)}}",
+        action: "expandtemplates",
+        prop: "wikitext",
+        text:
+          "{{POTD/{{CURRENTYEAR}}-{{CURRENTMONTH}}-{{CURRENTDAY2}}|texttitle}}",
       },
     });
 
@@ -23,27 +24,15 @@ export class Wikipedia extends Gallery {
       params: {
         action: "expandtemplates",
         prop: "wikitext",
-        text: "{{Potd/{{CURRENTYEAR}}-{{CURRENTMONTH}}-{{CURRENTDAY2}}}}",
+        text: "{{POTD/{{CURRENTYEAR}}-{{CURRENTMONTH}}-{{CURRENTDAY2}}|image}}",
       },
     });
 
-    const res3 = await api.get("", {
-      params: {
-        action: "query",
-        prop: "imageinfo",
-        iiprop: "url|user",
-        titles: "Image:" + res2.data.expandtemplates.wikitext,
-      },
-    });
-    const pages = res3.data.query.pages;
-    const info = pages[Object.keys(pages)[0]].imageinfo[0];
-
-    const $ = load((await res).data.parse.text["*"]);
+    const { url } = await imageUrl(api, res2.data.expandtemplates.wikitext);
 
     return {
-      title: $("div").text().trim(),
-      url: info.url,
-      copyright: info.user,
+      title: (await res).data.expandtemplates.wikitext,
+      url,
     };
   }
 }
