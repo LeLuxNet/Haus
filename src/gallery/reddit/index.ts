@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Gallery } from "../gallery";
 
-const subreddit = "earthporn";
+const subreddit = "EarthPorn";
 
 export class Reddit extends Gallery {
   async load() {
@@ -14,7 +14,7 @@ export class Reddit extends Gallery {
     return {
       title: data.title,
       url: data.preview.images[0].source.url.replace(/&amp;/g, "&"),
-      // copyright: `u/${data.author}`,
+      copyright: `u/${data.author}`,
     };
   }
 }

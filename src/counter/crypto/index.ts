@@ -1,5 +1,6 @@
 import axios from "axios";
 import { State } from "../../state";
+import { Update } from "../../update";
 import { Counter } from "../counter";
 
 const api = axios.create({
@@ -7,11 +8,18 @@ const api = axios.create({
 });
 
 export class CryptoCurrency extends Counter {
-  id: string;
-
   constructor(id: string) {
+    const update = new Update(async () => {
+      const res = await api.get(`coins/${id}`);
+
+      this.name.update(`${res.data.name} (${res.data.symbol.toUpperCase()})`);
+      avatar.update(res.data.image.large);
+    });
+
+    const avatar = new State<string>({ update });
+
     super(
-      new State({}),
+      new State({ update }),
       new State({
         get: async function () {
           const res = await api.get("simple/price", {
@@ -22,13 +30,7 @@ export class CryptoCurrency extends Counter {
         autoUpdate: 10 * 60,
       })
     );
-    this.avatar = new State({});
 
-    api.get(`coins/${id}`).then((res) => {
-      this.name.update(`${res.data.name} (${res.data.symbol.toUpperCase()})`);
-      this.avatar!.update(res.data.image.large);
-    });
-
-    this.id = id;
+    this.avatar = avatar;
   }
 }

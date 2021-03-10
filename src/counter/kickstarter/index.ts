@@ -1,5 +1,6 @@
 import axios from "axios";
 import { State } from "../../state";
+import { Update } from "../../update";
 import { Counter } from "../counter";
 
 const csrf =
@@ -9,33 +10,28 @@ const session =
 
 export class Kickstarter extends Counter {
   constructor(owner: string, project: string) {
-    super(
-      new State({}),
-      new State({
-        get: () =>
-          axios
-            .post(
-              "https://www.kickstarter.com/graph",
-              {
-                query:
-                  "query($slug: String!) { project(slug: $slug) { pid name pledged { amount }}}",
-                variables: {
-                  slug: `${owner}/${project}`,
-                },
-              },
-              {
-                headers: {
-                  "x-csrf-token": csrf,
-                  cookie: `_ksr_session=${session};`,
-                },
-              }
-            )
-            .then((res) => {
-              this.name.update(res.data.data.project.name);
-              return parseInt(res.data.data.project.pledged.amount);
-            }),
-        autoUpdate: 1 * 60,
-      })
-    );
+    const update = new Update(async () => {
+      const res = await axios.post(
+        "https://www.kickstarter.com/graph",
+        {
+          query:
+            "query($slug: String!) { project(slug: $slug) { pid name pledged { amount }}}",
+          variables: {
+            slug: `${owner}/${project}`,
+          },
+        },
+        {
+          headers: {
+            "x-csrf-token": csrf,
+            cookie: `_ksr_session=${session};`,
+          },
+        }
+      );
+
+      this.name.update(res.data.data.project.name);
+      this.val.update(parseInt(res.data.data.project.pledged.amount));
+    });
+
+    super(new State({ update }), new State({ update, autoUpdate: 60 }));
   }
 }

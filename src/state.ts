@@ -1,5 +1,6 @@
 import { Color } from "./lighting/color";
 import { Trigger } from "./trigger";
+import { Update } from "./update";
 
 type Get<T> = () => Promise<T>;
 type Set<T> = (val: T) => Promise<void>;
@@ -11,6 +12,8 @@ export interface StateConstructor<T> {
   set?: Set<T>;
 
   autoUpdate?: number;
+
+  update?: Update;
 }
 
 export class State<T> extends Trigger<T> {
@@ -20,9 +23,9 @@ export class State<T> extends Trigger<T> {
   _autoUpdateInterval?: NodeJS.Timeout;
 
   readonly get?: Get<T>;
-  set?: Set<T>;
+  readonly set?: Set<T>;
 
-  constructor({ initial, get, set, autoUpdate }: StateConstructor<T>) {
+  constructor({ initial, get, set, autoUpdate, update }: StateConstructor<T>) {
     super();
     this.last = initial;
     this.autoUpdate = autoUpdate;
@@ -33,7 +36,11 @@ export class State<T> extends Trigger<T> {
           this.update(val);
           return val;
         });
+    } else if (update !== undefined) {
+      this.get = () => update.fun().then(() => this.last!);
+    }
 
+    if (this.get !== undefined) {
       if (this.last === undefined) {
         this.get();
       }

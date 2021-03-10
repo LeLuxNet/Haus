@@ -7,12 +7,14 @@ export class Update {
   }
 
   scedule() {
-    if (!this.scheduled) {
-      this.scheduled = true;
-      process.nextTick(() => {
-        this.scheduled = false;
-        return this.fun();
-      });
-    }
+    return new Promise<void>((resolve, reject) => {
+      if (!this.scheduled) {
+        this.scheduled = true;
+        process.nextTick(() => {
+          this.scheduled = false;
+          this.fun().then(resolve).catch(reject);
+        });
+      }
+    });
   }
 }
