@@ -5,7 +5,7 @@ import axios from "axios";
 import TelegramBot from "node-telegram-bot-api";
 import { Lazy } from "../../lazy";
 import { Chat } from "../chat";
-import { ChatContent } from "../content";
+import { AttachmentType, ChatContent } from "../content";
 import { ChatChannel, ChatMessage } from "../message";
 
 export class Telegram extends Chat {
@@ -21,49 +21,34 @@ export class Telegram extends Chat {
         );
       }
 
-      const fileIds: string[] = [];
-      if (msg.photo !== undefined) {
-        msg.photo.forEach((f) => fileIds.push(f.file_id));
-      }
-
-      if (msg.video !== undefined) {
-        fileIds.push(msg.video.file_id);
-      }
-
-      if (msg.audio !== undefined) {
-        fileIds.push(msg.audio.file_id);
-      }
-
-      if (msg.voice !== undefined) {
-        fileIds.push(msg.voice.file_id);
-      }
-
-      if (msg.document !== undefined) {
-        fileIds.push(msg.document.file_id);
-      }
-
-      if (msg.sticker !== undefined) {
-        fileIds.push(msg.sticker.file_id);
-      }
-
-      const files = await Promise.all(
-        fileIds.map((f) => client.getFileLink(f))
-      );
-
-      files.forEach((f) =>
+      const sendFile = (type: AttachmentType, fileId: string) =>
         this.msg.trigger(
           new TelegramMessage(
             {
-              type: "attachment",
-              attachment: new Lazy(() =>
-                axios.get(f, { responseType: "stream" }).then((res) => res.data)
-              ),
+              type,
+              name: "",
+              data: new Lazy(async () => {
+                const f = await client.getFileLink(fileId);
+                const res = await axios.get(f, { responseType: "stream" });
+                return res.data;
+              }),
             },
             msg,
             client
           )
-        )
-      );
+        );
+
+      const fileIds: string[] = [];
+      if (msg.photo !== undefined) {
+        msg.photo.forEach((f) => sendFile("image", f.file_id));
+      }
+
+      if (msg.video !== undefined) sendFile("video", msg.video.file_id);
+      if (msg.audio !== undefined) sendFile("audio", msg.audio.file_id);
+      if (msg.voice !== undefined) sendFile("video", msg.voice.file_id);
+      if (msg.document !== undefined)
+        sendFile("document", msg.document.file_id);
+      if (msg.sticker !== undefined) sendFile("image", msg.sticker.file_id);
     });
   }
 }
@@ -95,11 +80,17 @@ class TelegramMessage extends ChatMessage {
           reply_to_message_id: this._msgId,
         });
         break;
-      case "attachment":
-        await this._client.sendDocument(
-          this._chatId,
-          await content.attachment.get()
-        );
+      case "image":
+        await this._client.sendPhoto(this._chatId, await content.data.get());
+        break;
+      case "audio":
+        await this._client.sendAudio(this._chatId, await content.data.get());
+        break;
+      case "video":
+        await this._client.sendVideo(this._chatId, await content.data.get());
+        break;
+      case "document":
+        await this._client.sendDocument(this._chatId, await content.data.get());
         break;
     }
   }

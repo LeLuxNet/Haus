@@ -9,8 +9,11 @@ interface TextMessage {
   text: string;
 }
 
-interface AttachmentMessage {
-  type: "attachment";
+export type AttachmentType = "image" | "audio" | "video" | "document";
 
-  attachment: Lazy<Promise<string | Buffer | Stream>>;
+interface AttachmentMessage {
+  type: AttachmentType;
+
+  name: string;
+  data: Lazy<Promise<string | Buffer | Stream>>;
 }

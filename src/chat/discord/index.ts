@@ -1,3 +1,4 @@
+import axios from "axios";
 import {
   Client,
   DMChannel,
@@ -25,18 +26,34 @@ export class Discord extends Chat {
     });
 
     client.on("message", (msg) => {
+      if (msg.author.id === client.user?.id) return;
+
       this.msg.trigger(
         new DiscordMessage({ type: "text", text: msg.content }, msg)
       );
 
-      msg.attachments.forEach((a) =>
-        this.msg.trigger(
-          new DiscordMessage(
-            { type: "attachment", attachment: Lazy.pval(a.attachment) },
+      Promise.all(
+        msg.attachments.map(async (a) => {
+          const res = await axios.head(a.url);
+          const mime: string = res.headers["content-type"].split("/")[0];
+          const parts = a.url.split("/");
+          console.log(mime);
+
+          const type =
+            mime === "image" || mime === "audio" || mime === "video"
+              ? mime
+              : "document";
+
+          return new DiscordMessage(
+            {
+              type,
+              name: parts[parts.length - 1],
+              data: Lazy.pval(a.attachment),
+            },
             msg
-          )
-        )
-      );
+          );
+        })
+      ).then((m) => m.forEach((m2) => this.msg.trigger(m2)));
     });
 
     client.login(token);
@@ -60,8 +77,11 @@ class DiscordMessage extends ChatMessage {
       case "text":
         await this._msg.reply(content.text);
         break;
-      case "attachment":
-        await this._msg.reply({ files: [await content.attachment.get()] });
+      case "image":
+      case "audio":
+      case "video":
+      case "document":
+        await this._msg.reply({ files: [await content.data.get()] });
         break;
     }
   }
@@ -87,8 +107,11 @@ class DiscordChannel extends ChatChannel {
       case "text":
         await this._channel.send(content.text);
         break;
-      case "attachment":
-        await this._channel.send({ files: [await content.attachment.get()] });
+      case "image":
+      case "audio":
+      case "video":
+      case "document":
+        await this._channel.send({ files: [await content.data.get()] });
         break;
     }
   }
