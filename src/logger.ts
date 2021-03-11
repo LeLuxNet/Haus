@@ -1,3 +1,4 @@
+import logLevel from "loglevel";
 import { PRODUCTION } from "./const";
 
 const noColor = false;
@@ -10,10 +11,21 @@ function color(code: number) {
 export class Logger {
   name: string;
 
+  external: boolean = false;
+
   static _ = new Logger("");
 
   constructor(name: string) {
     this.name = name;
+  }
+
+  replaceLoglevel(l: logLevel.Logger) {
+    l.trace = (...msgs) => this.debug(msgs.join(" "));
+    l.debug = (...msgs) => this.debug(msgs.join(" "));
+    l.log = (...msgs) => this.info(msgs.join(" "));
+    l.info = (...msgs) => this.info(msgs.join(" "));
+    l.warn = (...msgs) => this.warn(msgs.join(" "));
+    l.error = (...msgs) => this.error(msgs.join(" "));
   }
 
   _prefix(level: string, code: number) {
@@ -32,7 +44,11 @@ export class Logger {
   }
 
   info(msg: string) {
-    console.log(this._prefix("info", 94) + msg);
+    if (this.external) {
+      this.debug(msg);
+    } else {
+      console.log(this._prefix("info", 94) + msg);
+    }
   }
 
   warn(msg: string) {

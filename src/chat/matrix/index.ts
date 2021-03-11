@@ -6,10 +6,16 @@ import {
   Room,
   RoomMember,
 } from "matrix-js-sdk";
+import { logger as sdkLogger } from "matrix-js-sdk/lib/logger";
 import { Lazy } from "../../lazy";
+import { Logger } from "../../logger";
 import { Chat } from "../chat";
 import { AttachmentType, ChatContent } from "../content";
 import { ChatChannel, ChatMessage } from "../message";
+
+const logger = new Logger("Matrix/SDK");
+logger.external = true;
+logger.replaceLoglevel(sdkLogger);
 
 const typeMap: { [type: string]: AttachmentType } = {
   "m.image": "image",
