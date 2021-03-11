@@ -93,7 +93,7 @@ class MatrixMessage extends ChatMessage {
   ) {
     super(
       content,
-      { name: event.sender.name },
+      { name: event.sender.name, bot: false },
       new MatrixChannel(room, client)
     );
   }

@@ -6,7 +6,8 @@ import { Counter } from "../counter";
 
 export class Reddit extends Counter {
   constructor(id: string) {
-    const update = new Update(async () => {
+    // https://github.com/microsoft/TypeScript/issues/42667
+    const update = new Update(async function () {
       const res = await axios.get(
         `https://www.reddit.com/comments/${id}.json`,
         {
@@ -17,10 +18,13 @@ export class Reddit extends Counter {
       );
       const post = res.data[0].data.children[0].data;
 
-      this.name.update(post.title);
-      this.val.update(post.score);
+      name.update(post.title);
+      val.update(post.score);
     });
 
-    super(new State({ update }), new State({ update, autoUpdate: 60 }));
+    const name = new State<string>({ update });
+    const val = new State<number>({ update, autoUpdate: 60 });
+
+    super(name, val);
   }
 }

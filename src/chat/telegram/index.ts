@@ -1,5 +1,6 @@
 // https://github.com/yagop/node-telegram-bot-api/issues/319
 process.env["NTBA_FIX_319"] = "1";
+process.env["NTBA_FIX_350"] = "1";
 
 import axios from "axios";
 import TelegramBot from "node-telegram-bot-api";
@@ -21,31 +22,36 @@ export class Telegram extends Chat {
         );
       }
 
-      const sendFile = (type: AttachmentType, fileId: string) =>
+      const sendFile = async (type: AttachmentType, fileId: string) => {
+        const f = await client.getFileLink(fileId);
+        const parts = f.split("/");
+
         this.msg.trigger(
           new TelegramMessage(
             {
               type,
-              name: "",
-              data: new Lazy(async () => {
-                const f = await client.getFileLink(fileId);
-                const res = await axios.get(f, { responseType: "stream" });
-                return res.data;
-              }),
+              name: parts[parts.length - 1],
+              data: new Lazy(() =>
+                axios
+                  .get(f, {
+                    responseType: "stream",
+                  })
+                  .then((res) => res.data)
+              ),
             },
             msg,
             client
           )
         );
+      };
 
-      const fileIds: string[] = [];
       if (msg.photo !== undefined) {
         msg.photo.forEach((f) => sendFile("image", f.file_id));
       }
 
       if (msg.video !== undefined) sendFile("video", msg.video.file_id);
       if (msg.audio !== undefined) sendFile("audio", msg.audio.file_id);
-      if (msg.voice !== undefined) sendFile("video", msg.voice.file_id);
+      if (msg.voice !== undefined) sendFile("audio", msg.voice.file_id);
       if (msg.document !== undefined)
         sendFile("document", msg.document.file_id);
       if (msg.sticker !== undefined) sendFile("image", msg.sticker.file_id);
@@ -65,7 +71,7 @@ class TelegramMessage extends ChatMessage {
   ) {
     super(
       content,
-      { name: getName(msg.from!) },
+      { name: getName(msg.from!), bot: msg.from!.is_bot },
       new TelegramChannel(client, msg.chat)
     );
     this._client = client;
@@ -73,26 +79,8 @@ class TelegramMessage extends ChatMessage {
     this._msgId = msg.message_id;
   }
 
-  async reply(content: ChatContent) {
-    switch (content.type) {
-      case "text":
-        await this._client.sendMessage(this._chatId, content.text, {
-          reply_to_message_id: this._msgId,
-        });
-        break;
-      case "image":
-        await this._client.sendPhoto(this._chatId, await content.data.get());
-        break;
-      case "audio":
-        await this._client.sendAudio(this._chatId, await content.data.get());
-        break;
-      case "video":
-        await this._client.sendVideo(this._chatId, await content.data.get());
-        break;
-      case "document":
-        await this._client.sendDocument(this._chatId, await content.data.get());
-        break;
-    }
+  reply(content: ChatContent) {
+    return sendMessage(content, this._client, this._chatId, this._msgId);
   }
 }
 
@@ -114,10 +102,42 @@ class TelegramChannel extends ChatChannel {
     this._chatId = chat.id;
   }
 
-  async send(content: ChatContent) {
+  send(content: ChatContent) {
+    return sendMessage(content, this._client, this._chatId);
+  }
+}
+
+async function sendMessage(
+  content: ChatContent,
+  client: TelegramBot,
+  chatId: number,
+  msgId?: number
+) {
+  const options: TelegramBot.SendMessageOptions = {
+    reply_to_message_id: msgId,
+  };
+
+  if (content.type === "text") {
+    client.sendMessage(chatId, content.text, options);
+  } else {
+    const data = await content.data.get();
+    const fileOptions = {
+      filename: content.name,
+      filepath: false,
+    };
+
     switch (content.type) {
-      case "text":
-        await this._client.sendMessage(this._chatId, content.text);
+      case "image":
+        (client.sendPhoto as any)(chatId, data, options, fileOptions);
+        break;
+      case "audio":
+        (client.sendAudio as any)(chatId, data, options, fileOptions);
+        break;
+      case "video":
+        (client.sendVideo as any)(chatId, data, options, fileOptions);
+        break;
+      case "document":
+        client.sendDocument(chatId, data, options, fileOptions);
         break;
     }
   }

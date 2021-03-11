@@ -19,6 +19,7 @@ export class ChatMessage {
 
 export interface ChatAuthor {
   name: string;
+  bot: boolean;
 }
 
 export abstract class ChatChannel {

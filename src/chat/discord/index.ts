@@ -28,16 +28,25 @@ export class Discord extends Chat {
     client.on("message", (msg) => {
       if (msg.author.id === client.user?.id) return;
 
-      this.msg.trigger(
-        new DiscordMessage({ type: "text", text: msg.content }, msg)
-      );
+      const attachments = msg.attachments.map((a) => a.url);
+
+      if (msg.content === "") {
+      } else if (
+        msg.content.startsWith("https://cdn.discordapp.com/attachments/") &&
+        !msg.content.includes(" ")
+      ) {
+        attachments.push(msg.content);
+      } else {
+        this.msg.trigger(
+          new DiscordMessage({ type: "text", text: msg.content }, msg)
+        );
+      }
 
       Promise.all(
-        msg.attachments.map(async (a) => {
-          const res = await axios.head(a.url);
+        attachments.map(async (a) => {
+          const res = await axios.head(a);
           const mime: string = res.headers["content-type"].split("/")[0];
-          const parts = a.url.split("/");
-          console.log(mime);
+          const parts = a.split("/");
 
           const type =
             mime === "image" || mime === "audio" || mime === "video"
@@ -48,7 +57,7 @@ export class Discord extends Chat {
             {
               type,
               name: parts[parts.length - 1],
-              data: Lazy.pval(a.attachment),
+              data: Lazy.pval(a),
             },
             msg
           );
@@ -66,7 +75,10 @@ class DiscordMessage extends ChatMessage {
   constructor(content: ChatContent, msg: Message) {
     super(
       content,
-      { name: msg.member?.nickname || msg.author.username },
+      {
+        name: msg.member?.nickname || msg.author.username,
+        bot: msg.author.bot,
+      },
       new DiscordChannel(msg.channel)
     );
     this._msg = msg;
