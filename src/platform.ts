@@ -1,8 +1,8 @@
-import { Device } from "./device";
 import { Logger } from "./logger";
+import { PluginInstance } from "./plugins";
 import { Home } from "./server/home";
 
-export abstract class Platform {
+export abstract class Platform implements PluginInstance {
   id: string;
   home: Home;
   logger: Logger;
@@ -13,7 +13,6 @@ export abstract class Platform {
     this.logger = logger;
   }
 
-  abstract devices(): Promise<Device[]>;
-
-  async stop() {}
+  // tmp
+  fields = {};
 }

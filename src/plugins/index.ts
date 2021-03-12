@@ -1,3 +1,5 @@
+import { Device } from "../device";
+import { Logger } from "../logger";
 import { Trigger } from "../trigger";
 import { exec } from "../utils/promisify";
 
@@ -6,11 +8,12 @@ export interface Plugin {
 
   deps?: Dependency[];
 
-  create: (data: any) => Promise<PluginInstance>;
+  create: (data: any, logger: Logger) => Promise<PluginInstance>;
 }
 
 export interface PluginInstance {
-  readonly fields: { [key: string]: Trigger<any> | undefined };
+  readonly fields?: { [key: string]: Trigger<any> | undefined };
+  readonly devices?: Promise<Device[]>;
 }
 
 interface Dependency {
@@ -23,7 +26,11 @@ export async function loadPlugin(plugin: Plugin, data: any) {
     await installDeps(plugin.deps);
   }
 
-  return await plugin.create(data);
+  const logger = new Logger(plugin.name);
+  const instance = await plugin.create(data, logger);
+
+  logger.debug("Loaded");
+  return instance;
 }
 
 async function installDeps(dep: Dependency[]) {

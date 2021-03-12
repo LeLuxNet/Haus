@@ -20,7 +20,7 @@ export class State<T> extends Trigger<T> {
   last?: T;
 
   autoUpdate?: number;
-  _autoUpdateInterval?: number;
+  _autoUpdateInterval?: NodeJS.Timeout;
 
   readonly get?: Get<T>;
   readonly set?: Set<T>;
@@ -46,7 +46,7 @@ export class State<T> extends Trigger<T> {
       }
 
       if (this.subscriptions.length < 0 && this.autoUpdate !== undefined) {
-        this._autoUpdateInterval = window.setInterval(
+        this._autoUpdateInterval = global.setInterval(
           this.get,
           this.autoUpdate * 1000
         );
@@ -90,7 +90,7 @@ export class State<T> extends Trigger<T> {
       this.autoUpdate !== undefined &&
       this.get !== undefined
     ) {
-      this._autoUpdateInterval = window.setInterval(
+      this._autoUpdateInterval = global.setInterval(
         this.get,
         this.autoUpdate * 1000
       );

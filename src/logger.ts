@@ -1,5 +1,5 @@
 import logLevel from "loglevel";
-import { PRODUCTION } from "./const";
+import { PRODUCTION, TEST } from "./const";
 
 const noColor = false;
 
@@ -38,7 +38,7 @@ export class Logger {
   }
 
   debug(msg: string) {
-    if (!PRODUCTION) {
+    if (!PRODUCTION && !TEST) {
       console.debug(this._prefix("debug", 96) + msg);
     }
   }
