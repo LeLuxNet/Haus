@@ -1,13 +1,15 @@
 import axios from "axios";
 import { NAME, VERSION } from "../../const";
+import { Plugin } from "../../plugins";
 import { State } from "../../state";
 import { Update } from "../../update";
 import { Counter } from "../counter";
 
-export class Reddit extends Counter {
-  constructor(id: string) {
-    // https://github.com/microsoft/TypeScript/issues/42667
-    const update = new Update(async function () {
+export default <Plugin>{
+  name: "Reddit",
+
+  create: async ({ id }) => {
+    const update = new Update(async () => {
       const res = await axios.get(
         `https://www.reddit.com/comments/${id}.json`,
         {
@@ -25,6 +27,6 @@ export class Reddit extends Counter {
     const name = new State<string>({ update });
     const val = new State<number>({ update, autoUpdate: 60 });
 
-    super(name, val);
-  }
-}
+    return new Counter(name, val);
+  },
+};

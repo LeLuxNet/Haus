@@ -1,32 +1,28 @@
 import axios from "axios";
+import { Plugin } from "../../plugins";
 import { State } from "../../state";
+import { Update } from "../../update";
 import { Counter } from "../counter";
 
-export class GitHub extends Counter {
-  id: string;
+// https://api.github.com/user/{id}
+// https://api.github.com/users/{username}
 
-  constructor(id: string, name: string, val: number, avatar: string) {
-    super(new State({ initial: name }), new State({ initial: val }));
-    this.avatar = new State({ initial: avatar });
+export default <Plugin>{
+  name: "GitHub",
 
-    this.id = id;
+  create: async ({ username }) => {
+    const update = new Update(async () => {
+      const res = await axios.get(`https://api.github.com/users/${username}`);
 
-    setInterval(async () => {
-      const res = await axios.get(`https://api.github.com/user/${id}`);
+      name.update(res.data.login);
+      val.update(res.data.followers);
+      avatar.update(res.data.avatar_url);
+    });
 
-      this.name.update(res.data.login);
-      this.val.update(res.data.followers);
-      this.avatar?.update(res.data.avatar_url);
-    }, 1 * 60 * 1000);
-  }
+    const name = new State<string>({ update, autoUpdate: 60 });
+    const val = new State<number>({ update });
+    const avatar = new State<string>({ update });
 
-  static async create(username: string) {
-    const res = await axios.get(`https://api.github.com/users/${username}`);
-    return new GitHub(
-      res.data.id,
-      res.data.login,
-      res.data.followers,
-      res.data.avatar_url
-    );
-  }
-}
+    return new Counter(name, val, avatar);
+  },
+};

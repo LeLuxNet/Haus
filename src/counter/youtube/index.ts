@@ -1,31 +1,30 @@
 import axios from "axios";
+import { Plugin } from "../../plugins";
 import { State } from "../../state";
 import { Update } from "../../update";
 import { Counter } from "../counter";
 
-export class YouTube extends Counter {
-  constructor(id: string, key: string) {
+export default <Plugin>{
+  name: "YouTube",
+
+  create: async ({ id, key }) => {
     const update = new Update(() =>
       request(id, key, "snippet").then((d) => {
-        this.name.update(d.title);
+        name.update(d.title);
         avatar.update(d.thumbnails.high.url);
       })
     );
 
+    const name = new State<string>({ update });
+    const val = new State<number>({
+      get: () => request(id, key, "statistics").then((d) => d.subscriberCount),
+      autoUpdate: 60,
+    });
     const avatar = new State<string>({ update });
 
-    super(
-      new State({ update }),
-      new State({
-        get: () =>
-          request(id, key, "statistics").then((d) => d.subscriberCount),
-        autoUpdate: 60,
-      })
-    );
-
-    this.avatar = avatar;
-  }
-}
+    return new Counter(name, val, avatar);
+  },
+};
 
 async function request(id: string, key: string, part: string) {
   const res = await axios.get(
