@@ -1,6 +1,5 @@
-import { unlink } from "fs/promises";
 import wallpaper from "wallpaper";
-import { File, saveFile } from "../../file";
+import { deleteFile, File, saveFile } from "../../file";
 import { Plugin } from "../../plugins";
 import { State } from "../../state";
 
@@ -13,7 +12,7 @@ export default <Plugin>{
       set: async (file) => {
         const path = await saveFile(file);
         await wallpaper.set(path);
-        await unlink(path);
+        await deleteFile(path);
       },
     });
 

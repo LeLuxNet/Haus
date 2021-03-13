@@ -1,5 +1,5 @@
 import axios from "axios";
-import { createWriteStream } from "fs";
+import { createWriteStream, promises } from "fs";
 import { Readable } from "stream";
 
 export type File = string | Readable | Buffer;
@@ -20,4 +20,8 @@ export async function saveFile(file: File, path?: string) {
   }
 
   return path;
+}
+
+export function deleteFile(path: string) {
+  return promises.unlink(path);
 }

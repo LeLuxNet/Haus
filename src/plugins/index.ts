@@ -42,6 +42,9 @@ export async function loadPlugin(plugin: Plugin, data: any, home: Home) {
 
   const instance = await plugin.create(data, id, home, logger);
 
+  home.plugins[id] = instance;
+  home.register(instance);
+
   logger.debug("Loaded");
   return instance;
 }
