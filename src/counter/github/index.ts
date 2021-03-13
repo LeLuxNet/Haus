@@ -9,8 +9,9 @@ import { Counter } from "../counter";
 
 export default <Plugin>{
   name: "GitHub",
+  id: "github-followers",
 
-  create: async ({ username }) => {
+  create: async ({ username }, id) => {
     const update = new Update(async () => {
       const res = await axios.get(`https://api.github.com/users/${username}`);
 
@@ -23,6 +24,6 @@ export default <Plugin>{
     const val = new State<number>({ update });
     const avatar = new State<string>({ update });
 
-    return new Counter(name, val, avatar);
+    return new Counter(id, name, val, avatar);
   },
 };

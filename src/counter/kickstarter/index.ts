@@ -11,8 +11,9 @@ const session =
 
 export default <Plugin>{
   name: "Kickstarter",
+  id: "kickstarter",
 
-  create: async ({ owner, project }) => {
+  create: async ({ owner, project }, id) => {
     const update = new Update(async () => {
       const res = await axios.post(
         "https://www.kickstarter.com/graph",
@@ -38,6 +39,6 @@ export default <Plugin>{
     const name = new State<string>({ update });
     const val = new State<number>({ update, autoUpdate: 60 });
 
-    return new Counter(name, val);
+    return new Counter(id, name, val);
   },
 };

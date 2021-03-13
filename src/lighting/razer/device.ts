@@ -1,15 +1,22 @@
-import { Razer } from ".";
+import { AxiosInstance } from "axios";
 import { Device } from "../../device";
+import { Platform } from "../../platform";
+import { Home } from "../../server/home";
 import { Update } from "../../update";
 
 export abstract class RazerDevice extends Device {
-  razer: Razer;
-
+  api: AxiosInstance;
   update: Update;
 
-  constructor(razer: Razer, fun: () => Promise<void>, type: string) {
-    super(razer.home.getDeviceId(razer, type), razer);
-    this.razer = razer;
+  constructor(
+    api: AxiosInstance,
+    platform: Platform,
+    home: Home,
+    type: string,
+    fun: () => Promise<void>
+  ) {
+    super(home.getDeviceId(platform, type), platform);
+    this.api = api;
     this.update = new Update(fun);
   }
 

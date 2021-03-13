@@ -52,8 +52,9 @@ export const services: { [key: string]: ConnectionService } = {
 
 export default <Plugin>{
   name: "Connection check",
+  id: "connection-check",
 
-  create: async ({ service }) => {
+  create: async ({ service }, id) => {
     const s = services[service];
 
     const connected = new State<boolean>({
@@ -67,6 +68,7 @@ export default <Plugin>{
     });
 
     return {
+      id,
       fields: { connected },
     };
   },

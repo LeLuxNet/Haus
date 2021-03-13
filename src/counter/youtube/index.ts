@@ -6,8 +6,9 @@ import { Counter } from "../counter";
 
 export default <Plugin>{
   name: "YouTube",
+  id: "youtube-subscribers",
 
-  create: async ({ id, key }) => {
+  create: async ({ id, key }, pid) => {
     const update = new Update(() =>
       request(id, key, "snippet").then((d) => {
         name.update(d.title);
@@ -22,7 +23,7 @@ export default <Plugin>{
     });
     const avatar = new State<string>({ update });
 
-    return new Counter(name, val, avatar);
+    return new Counter(pid, name, val, avatar);
   },
 };
 

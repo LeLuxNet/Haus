@@ -1,10 +1,12 @@
 import github from ".";
 import { loadPlugin } from "../../plugins";
+import { Home } from "../../server/home";
 import { State } from "../../state";
 
 describe("GitHub follower counter", () => {
   it("should be in range", async () => {
-    const counter = await loadPlugin(github, { username: "ginnyTheCat" });
+    const home = new Home("", "");
+    const counter = await loadPlugin(github, { username: "ginnyTheCat" }, home);
 
     const val = await (counter.fields!.val as State<number>).get!();
     const avatar = await (counter.fields!.avatar as State<string>).get!();

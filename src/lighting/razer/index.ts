@@ -1,7 +1,6 @@
-import axios, { AxiosInstance } from "axios";
+import axios from "axios";
 import { AUTHOR, AUTHOR_LINK, NAME } from "../../const";
-import { Logger } from "../../logger";
-import { Home } from "../../server/home";
+import { Plugin } from "../../plugins";
 import { Color } from "../color";
 import { Lighting } from "../lighting";
 import { RazerHeadset } from "./devices/headset";
@@ -11,56 +10,6 @@ import { RazerMouse } from "./devices/mouse";
 import { RazerMousepad } from "./devices/mousepad";
 import { RazerError } from "./error";
 
-export class Razer extends Lighting {
-  api: AxiosInstance;
-  heartbeat: NodeJS.Timeout;
-
-  headset: RazerHeadset;
-  keyboard: RazerKeyboard;
-  keypad: RazerKeypad;
-  mousepad: RazerMousepad;
-  mouse: RazerMouse;
-
-  constructor(host: string, id: string, home: Home, logger: Logger) {
-    super(id, home, logger);
-    this.api = axios.create({
-      baseURL: host,
-    });
-
-    this.api.interceptors.response.use((res) => {
-      if (res.data.result) {
-        throw new RazerError(res.data.result, res.data.error);
-      }
-      return res;
-    });
-
-    this.heartbeat = setInterval(() => {
-      this.api.put("heartbeat");
-    }, 1000);
-
-    this.headset = new RazerHeadset(this);
-    this.keyboard = new RazerKeyboard(this);
-    this.keypad = new RazerKeypad(this);
-    this.mousepad = new RazerMousepad(this);
-    this.mouse = new RazerMouse(this);
-  }
-
-  async devices() {
-    return [
-      this.headset,
-      this.keyboard,
-      this.keypad,
-      this.mousepad,
-      this.mouse,
-    ];
-  }
-
-  async stop() {
-    clearInterval(this.heartbeat);
-    await this.api.delete("");
-  }
-}
-
 export function toRzColor(color?: Color) {
   if (color === undefined) return 0;
 
@@ -68,17 +17,49 @@ export function toRzColor(color?: Color) {
   return (b << 16) + (g << 8) + r;
 }
 
-export async function create({}, id: string, home: Home, logger: Logger) {
-  const res = await axios.post("http://localhost:54235/razer/chromasdk", {
-    title: NAME,
-    description: " ",
-    author: {
-      name: AUTHOR,
-      contact: AUTHOR_LINK,
-    },
-    device_supported: ["headset", "keyboard", "keypad", "mouse", "mousepad"],
-    category: "application",
-  });
+export default <Plugin>{
+  name: "Razer",
+  id: "razer",
 
-  return new Razer(res.data.uri, id, home, logger);
-}
+  create: async ({}, id, home, logger) => {
+    const res = await axios.post("http://localhost:54235/razer/chromasdk", {
+      title: NAME,
+      description: " ",
+      author: {
+        name: AUTHOR,
+        contact: AUTHOR_LINK,
+      },
+      device_supported: ["headset", "keyboard", "keypad", "mouse", "mousepad"],
+      category: "application",
+    });
+
+    const api = axios.create({
+      baseURL: res.data.uri,
+    });
+
+    api.interceptors.response.use((res) => {
+      if (res.data.result) {
+        throw new RazerError(res.data.result, res.data.error);
+      }
+      return res;
+    });
+
+    const heartbeat = global.setInterval(() => api.put("heartbeat"), 1000);
+
+    const instance = new Lighting(id, home, logger, async (platform) => {
+      return [
+        new RazerHeadset(api, platform, home),
+        new RazerKeyboard(api, platform, home),
+        new RazerKeypad(api, platform, home),
+        new RazerMousepad(api, platform, home),
+        new RazerMouse(api, platform, home),
+      ];
+    });
+    instance.stop = () => {
+      clearInterval(heartbeat);
+      return api.delete("");
+    };
+
+    return instance;
+  },
+};

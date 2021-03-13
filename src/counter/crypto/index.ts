@@ -10,8 +10,9 @@ const api = axios.create({
 
 export default <Plugin>{
   name: "Cryptocurrencies",
+  id: "cryptocurrencies",
 
-  create: async ({ id }) => {
+  create: async ({ id }, pid) => {
     const update = new Update(async () => {
       const res = await api.get(`coins/${id}`);
 
@@ -31,6 +32,6 @@ export default <Plugin>{
     });
     const avatar = new State<string>({ update });
 
-    return new Counter(name, val);
+    return new Counter(pid, name, val);
   },
 };

@@ -1,4 +1,4 @@
-import { Stream } from "stream";
+import { File } from "../file";
 import { Lazy } from "../lazy";
 
 export type ChatContent = TextMessage | AttachmentMessage;
@@ -15,5 +15,5 @@ interface AttachmentMessage {
   type: AttachmentType;
 
   name: string;
-  data: Lazy<Promise<string | Buffer | Stream>>;
+  data: Lazy<Promise<File>>;
 }

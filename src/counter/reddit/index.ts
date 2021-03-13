@@ -7,8 +7,9 @@ import { Counter } from "../counter";
 
 export default <Plugin>{
   name: "Reddit",
+  id: "reddit-post-score",
 
-  create: async ({ id }) => {
+  create: async ({ id }, pid) => {
     const update = new Update(async () => {
       const res = await axios.get(
         `https://www.reddit.com/comments/${id}.json`,
@@ -27,6 +28,6 @@ export default <Plugin>{
     const name = new State<string>({ update });
     const val = new State<number>({ update, autoUpdate: 60 });
 
-    return new Counter(name, val);
+    return new Counter(pid, name, val);
   },
 };

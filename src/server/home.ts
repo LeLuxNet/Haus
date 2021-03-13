@@ -1,7 +1,6 @@
 import { Device } from "../device";
-import { Platform } from "../platform";
+import { PluginInstance } from "../plugins";
 import { Trigger } from "../trigger";
-import { createPlatform, PlatformData } from "./platforms";
 
 export const homes: Map<string, Home> = new Map();
 
@@ -9,7 +8,7 @@ export class Home extends Trigger<any> {
   id: string;
   name: string;
 
-  platforms: Platform[] = [];
+  plugins: (PluginInstance | undefined)[] = [];
   devices: Device[] = [];
 
   private dIds: Map<string, number> = new Map();
@@ -24,8 +23,9 @@ export class Home extends Trigger<any> {
     this.nextDId = 1;
   }
 
-  getDeviceId(platform: Platform, uid?: string) {
-    const did = uid === undefined ? platform.id : `${platform.id}|${uid}`;
+  getDeviceId(plugin: PluginInstance, uid?: string) {
+    const did =
+      uid === undefined ? plugin.id.toString() : `${plugin.id}|${uid}`;
 
     var id = this.dIds.get(did);
     if (id === undefined) {
@@ -35,16 +35,18 @@ export class Home extends Trigger<any> {
     return id;
   }
 
-  async loadPlatform(id: string, data: PlatformData) {
+  /* async loadPlatform(id: string, data: PlatformData) {
     const platform = await createPlatform(id, this, data);
     if (platform === undefined) return;
 
     this.platforms.push(platform);
-    await this.loadDevices(platform);
-  }
+    // await this.loadDevices(platform);
+  } */
 
-  async loadDevices(platform: Platform) {
-    const devs = await platform.devices();
+  async register(plugin: PluginInstance) {
+    if (plugin.devices === undefined) return;
+
+    const devs = await plugin.devices();
     devs.forEach((d) => {
       this.devices[d.id] = d;
       if (this.subscriptions.length < 0) {
