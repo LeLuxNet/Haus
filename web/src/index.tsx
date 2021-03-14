@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import ReactDOM from "react-dom";
 import { Device, getDevices } from "./api";
-import { DeviceComponent } from "./components/device";
+import { RoomComponent } from "./components/room";
+import { RoomlistComponent } from "./components/roomlist";
+import TitlebarComponent from "./components/titlebar";
 
 const devPromise = getDevices();
 
@@ -11,12 +13,11 @@ function App() {
   devPromise.then(setDevices);
 
   return (
-    <div>
-      <h1>Haus</h1>
-      <div>
-        {devices.map((d) => (
-          <DeviceComponent dev={d} key={d.id} />
-        ))}
+    <div className="bg-gray-100 w-screen h-screen">
+      <TitlebarComponent title="LeLuxNet"></TitlebarComponent>
+      <div className="grid main-grid">
+        <RoomlistComponent rooms={[{id: 0, name: "test", devices: []}, {id: 1, name: "test", devices: []}, {id: 2, name: "test", devices: []}, {id: 3, name: "test", devices: []}]}></RoomlistComponent>
+        <RoomComponent room={{name: "test", id: 0, devices: []}}></RoomComponent>
       </div>
     </div>
   );

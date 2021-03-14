@@ -8,13 +8,14 @@ function createWindow() {
   const mainWindow = new BrowserWindow({
     height: 600,
     width: 800,
+    frame: false,
     webPreferences: {
+      nodeIntegration: true,
       preload: path.join(__dirname, "preload.js"),
     },
   });
 
   mainWindow.loadFile(path.join(__dirname, "../../web/index.html"));
-
   // mainWindow.webContents.openDevTools();
 }
 
