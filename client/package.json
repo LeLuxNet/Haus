@@ -1,0 +1,41 @@
+{
+  "name": "client",
+  "productName": "Haus",
+  "description": "",
+  "author": "LeLuxNet",
+  "version": "1.0.0",
+  "main": "./dist/main.js",
+  "build": {
+    "appId": "net.lelux.haus",
+    "files": [
+      "dist/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "extraResources": "out/**/*",
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "directories": {
+      "buildResources": "resources"
+    },
+    "publish": null
+  },
+  "scripts": {
+    "prebuild": "tsc",
+    "build": "electron-builder",
+    "predev": "tsc",
+    "dev": "cross-env APP_DEV=true electron ."
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^14.14.34",
+    "cross-env": "^7.0.3",
+    "electron": "^12.0.1",
+    "electron-builder": "^22.10.5",
+    "typescript": "^4.2.3"
+  }
+}

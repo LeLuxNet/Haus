@@ -1,19 +1,22 @@
 import { app, BrowserWindow } from "electron";
-import path from "path";
-import { startServer } from "../server";
+import { join } from "path";
 
-startServer("31313");
+const dev = process.env.APP_DEV !== undefined;
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
-    height: 600,
     width: 800,
+    height: 600,
     webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
+      preload: join(__dirname, "preload.js"),
     },
   });
 
-  mainWindow.loadFile(path.join(__dirname, "../../web/index.html"));
+  if (dev) {
+    mainWindow.loadURL("http://localhost:3000");
+  } else {
+    mainWindow.loadFile(join(__dirname, "../out/index.html"));
+  }
 
   // mainWindow.webContents.openDevTools();
 }
@@ -21,7 +24,7 @@ function createWindow() {
 app.on("ready", () => {
   createWindow();
 
-  app.on("activate", function () {
+  app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
 });

@@ -1,0 +1,51 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "nodejs dist/index.js",
+    "build": "tsc",
+    "prepack": "npm run build",
+    "dev": "ts-node src/index.ts",
+    "watch": "ts-node-dev --respawn src/index.ts",
+    "test": "jest"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "modulePathIgnorePatterns": [
+      "dist"
+    ]
+  },
+  "dependencies": {
+    "axios": "^0.21.1",
+    "cheerio": "^1.0.0-rc.5",
+    "discord-rpc": "^3.2.0",
+    "discord.js": "^12.5.1",
+    "express": "^4.17.1",
+    "matrix-js-sdk": "^9.8.0",
+    "node-telegram-bot-api": "^0.51.0",
+    "suncalc": "^1.8.0",
+    "websocket": "^1.0.33"
+  },
+  "devDependencies": {
+    "@types/discord-rpc": "^3.0.5",
+    "@types/express": "^4.17.9",
+    "@types/jest": "^26.0.20",
+    "@types/matrix-js-sdk": "^9.2.0",
+    "@types/node": "^14.14.20",
+    "@types/node-telegram-bot-api": "^0.51.1",
+    "@types/suncalc": "^1.8.0",
+    "@types/websocket": "^1.0.1",
+    "@types/ws": "^7.4.0",
+    "electron": "^11.2.1",
+    "jest": "^26.6.3",
+    "ts-jest": "^26.5.3",
+    "ts-node": "^9.1.1",
+    "ts-node-dev": "^1.1.1",
+    "typescript": "^4.2.3",
+    "wallpaper": "^4.4.2"
+  }
+}
