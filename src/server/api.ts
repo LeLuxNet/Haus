@@ -1,12 +1,11 @@
 import express from "express";
 import { createServer, Server } from "http";
+import { server as WebSocketServer } from "websocket";
 import { Device } from "../device";
 import { Color } from "../lighting/color";
-import { Home, homes } from "./home";
-import { server as WebSocketServer } from "websocket";
-import { verifyAuth } from "./auth";
-import { Trigger } from "../trigger";
 import { State } from "../state";
+import { verifyAuth } from "./auth";
+import { Home, homes } from "./home";
 
 declare global {
   namespace Express {
@@ -18,8 +17,10 @@ declare global {
 }
 
 function deviceData(d: Device) {
-  const vals = d.values;
-  Object.keys(vals).map((key) => State.toJSON(vals[key]?.last));
+  const data = d.values;
+  Object.keys(data).forEach(
+    (key) => (data[key] = State.toJSON(data[key]?.last))
+  );
 
   return {
     id: d.id,
@@ -29,7 +30,7 @@ function deviceData(d: Device) {
     reachable: d.reachable?.last,
     battery: d.battery?.last,
 
-    data: vals,
+    data,
   };
 }
 

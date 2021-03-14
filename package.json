@@ -7,7 +7,7 @@
   "scripts": {
     "start": "nodejs dist/index.js",
     "build": "tsc",
-    "prepare": "npm run build",
+    "prepack": "npm run build",
     "dev": "ts-node src/index.ts",
     "watch": "ts-node-dev --respawn src/index.ts",
     "watch:web": "cd web && npm run watch",
@@ -29,10 +29,7 @@
     "express": "^4.17.1",
     "matrix-js-sdk": "^9.8.0",
     "node-telegram-bot-api": "^0.51.0",
-    "sharp": "^0.27.0",
     "suncalc": "^1.8.0",
-    "tr-O64": "^0.2.4",
-    "wallpaper": "^4.4.2",
     "websocket": "^1.0.33"
   },
   "devDependencies": {
@@ -42,7 +39,6 @@
     "@types/matrix-js-sdk": "^9.2.0",
     "@types/node": "^14.14.20",
     "@types/node-telegram-bot-api": "^0.51.1",
-    "@types/sharp": "^0.27.1",
     "@types/suncalc": "^1.8.0",
     "@types/websocket": "^1.0.1",
     "@types/ws": "^7.4.0",
@@ -51,6 +47,7 @@
     "ts-jest": "^26.5.3",
     "ts-node": "^9.1.1",
     "ts-node-dev": "^1.1.1",
-    "typescript": "^4.2.3"
+    "typescript": "^4.2.3",
+    "wallpaper": "^4.4.2"
   }
 }

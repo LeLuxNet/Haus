@@ -1,6 +1,9 @@
 import axios from "axios";
 
-const api = axios.create({ baseURL: "http://localhost:31313/home/123" });
+const api = axios.create({
+  baseURL: "http://localhost:31313/home/123",
+  headers: { Authorization: "Access-Token" },
+});
 
 export interface Device {
   id: number;
