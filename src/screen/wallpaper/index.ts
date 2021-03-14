@@ -7,6 +7,13 @@ export default <Plugin>{
   name: "Wallpaper",
   id: "wallpaper",
 
+  deps: [
+    {
+      name: "wallpaper",
+      version: "4.4.2",
+    },
+  ],
+
   create: async ({}, id) => {
     const image = new State<File>({
       set: async (file) => {

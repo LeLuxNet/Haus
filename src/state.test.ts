@@ -15,3 +15,22 @@ describe("State to JSON", () => {
     });
   });
 });
+
+describe("Create state", () => {
+  it("initial", async () => {
+    const state = new State({ initial: 5 });
+    expect(state.last).toBe(5);
+  });
+
+  it("get", async () => {
+    const state = new State({ get: async () => 5 });
+    expect(state.last).toBe(undefined);
+  });
+});
+
+describe("Get state", () => {
+  it("get", async () => {
+    const state = new State({ get: async () => 5 });
+    expect(await state.get!()).toBe(5);
+  });
+});

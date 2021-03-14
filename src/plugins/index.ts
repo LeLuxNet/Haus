@@ -33,26 +33,31 @@ interface Dependency {
 }
 
 export async function loadPlugin(plugin: Plugin, data: any, home: Home) {
+  const logger = new Logger(plugin.name);
+
   if (plugin.deps !== undefined) {
-    await installDeps(plugin.deps);
+    await installDeps(plugin.deps, logger);
   }
 
-  const logger = new Logger(plugin.name);
   const id = home.plugins.push(undefined);
 
   const instance = await plugin.create(data, id, home, logger);
 
   home.plugins[id] = instance;
-  home.register(instance);
+  await home.register(instance);
 
   logger.debug("Loaded");
   return instance;
 }
 
-async function installDeps(dep: Dependency[]) {
+async function installDeps(dep: Dependency[], logger: Logger) {
   if (dep.length === 0) return;
 
+  logger.info(
+    `Installing ${dep.length} dependenc${dep.length === 1 ? "y" : "ies"}`
+  );
+
   await exec(
-    "npm install " + dep.map((d) => `${d.name}@${d.version}`).join(" ")
+    "npm install --save " + dep.map((d) => `${d.name}@${d.version}`).join(" ")
   );
 }
