@@ -7,13 +7,16 @@ function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
+    frame: false,
     webPreferences: {
+      nodeIntegration: true,
+      enableRemoteModule: true,
       preload: join(__dirname, "preload.js"),
     },
   });
 
   if (dev) {
-    mainWindow.loadURL("http://localhost:3000");
+    mainWindow.loadURL("http://localhost:8080");
   } else {
     mainWindow.loadFile(join(__dirname, "../out/index.html"));
   }

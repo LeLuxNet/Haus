@@ -2,8 +2,8 @@
   "name": "client",
   "productName": "Haus",
   "description": "",
-  "author": "LeLuxNet",
   "version": "1.0.0",
+  "author": "LeLuxNet",
   "main": "./dist/main.js",
   "build": {
     "appId": "net.lelux.haus",
