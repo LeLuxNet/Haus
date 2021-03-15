@@ -1,17 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import ReactDOM from "react-dom";
-import { Device, getDevices } from "./api";
-import { RoomComponent } from "./components/room";
-import { RoomlistComponent } from "./components/roomlist";
+import RoomComponent from "./components/room";
+import RoomlistComponent from "./components/roomlist";
 import TitlebarComponent from "./components/titlebar";
 
-const devPromise = getDevices();
-
 function App() {
-  const [devices, setDevices] = useState<Device[]>([]);
-
-  devPromise.then(setDevices);
-
   // tmp
   const rooms = [
     {
