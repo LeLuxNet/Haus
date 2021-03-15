@@ -5,8 +5,11 @@
 @tailwind components;
 @tailwind utilities;
 
+* {
+  outline: none !important;
+}
 body {
-  font-family: "Inter", sans-serif;
+  font-family: "Inter", sans-serif
 }
 .arcade {
   font-family: "Press Start 2P", monospace;
@@ -17,7 +20,14 @@ body {
 .not-draggable {
   -webkit-app-region: no-drag
 }
-.main-grid {
+.not-selectable {
+  user-select: none;
+  cursor: default;
+}
+.selectable {
+  user-select: text;
+}
+.split {
   grid-template-columns: min-content 1fr;
   grid-template-rows: 1fr;
   height: calc(100vh - 2rem)

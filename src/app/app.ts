@@ -7,10 +7,12 @@ startServer("31313");
 function createWindow() {
   const mainWindow = new BrowserWindow({
     height: 600,
+    icon: path.join(__dirname, '../../icon.png'),
     width: 800,
     frame: false,
     webPreferences: {
       nodeIntegration: true,
+      enableRemoteModule: true,
       preload: path.join(__dirname, "preload.js"),
     },
   });

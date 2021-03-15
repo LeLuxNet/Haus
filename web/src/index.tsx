@@ -13,9 +13,9 @@ function App() {
   devPromise.then(setDevices);
 
   return (
-    <div className="bg-gray-100 w-screen h-screen">
+    <div className="bg-gray-100 w-screen h-screen not-selectable">
       <TitlebarComponent title="LeLuxNet"></TitlebarComponent>
-      <div className="grid main-grid">
+      <div className="grid split">
         <RoomlistComponent rooms={[{id: 0, name: "test", devices: []}, {id: 1, name: "test", devices: []}, {id: 2, name: "test", devices: []}, {id: 3, name: "test", devices: []}]}></RoomlistComponent>
         <RoomComponent room={{name: "test", id: 0, devices: []}}></RoomComponent>
       </div>
