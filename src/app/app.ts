@@ -7,7 +7,7 @@ startServer("31313");
 function createWindow() {
   const mainWindow = new BrowserWindow({
     height: 600,
-    icon: path.join(__dirname, '../../icon.png'),
+    icon: path.join(__dirname, "../../icon.png"),
     width: 800,
     frame: false,
     webPreferences: {

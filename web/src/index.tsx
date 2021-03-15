@@ -12,8 +12,8 @@ function App() {
       name: "Living room",
       devices: [
         { id: 0, name: "Table lamp" },
-        { id: 0, name: "TV" },
-        { id: 0, name: "Fish tank" },
+        { id: 1, name: "TV" },
+        { id: 2, name: "Fish tank" },
       ],
     },
     { id: 1, name: "Bath", devices: [] },
@@ -25,8 +25,8 @@ function App() {
     <div className="bg-gray-100 w-screen h-screen not-selectable">
       <TitlebarComponent title="LeLuxNet"></TitlebarComponent>
       <div className="grid split">
-        <RoomlistComponent rooms={[{id: 0, name: "test", devices: []}, {id: 1, name: "test", devices: []}, {id: 2, name: "test", devices: []}, {id: 3, name: "test", devices: []}]}></RoomlistComponent>
-        <RoomComponent room={{name: "test", id: 0, devices: []}}></RoomComponent>
+        <RoomlistComponent rooms={rooms}></RoomlistComponent>
+        <RoomComponent room={rooms[0]}></RoomComponent>
       </div>
     </div>
   );
