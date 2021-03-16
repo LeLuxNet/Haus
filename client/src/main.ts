@@ -27,14 +27,15 @@ function createWindow() {
   }
 
   ipcMain.handle("minimize", () => win.minimize());
-  ipcMain.handle("toggleMaximize", () => {
-    if (win.isMaximized()) {
-      win.unmaximize();
-    } else {
-      win.maximize();
-    }
-  });
+  ipcMain.handle("maximize", (_, max: boolean) =>
+    (max === undefined ? !win.isMaximized() : max)
+      ? win.maximize()
+      : win.unmaximize()
+  );
   ipcMain.handle("close", () => win.close());
+
+  win.on("maximize", () => win.webContents.send("maximize", true));
+  win.on("unmaximize", () => win.webContents.send("maximize", false));
 
   // win.webContents.openDevTools();
 }
