@@ -9,7 +9,7 @@ export class Home extends Trigger<any> {
   name: string;
 
   plugins: (PluginInstance | undefined)[] = [];
-  devices: Device[] = [];
+  devices: (Device | undefined)[] = [];
 
   private dIds: Map<string, number> = new Map();
   private nextDId: number;
@@ -50,7 +50,7 @@ export class Home extends Trigger<any> {
     devs.forEach((d) => {
       this.devices[d.id] = d;
       if (this.subscriptions.length < 0) {
-        this.devices[d.id].subscribe((v) => this.trigger({ [d.id]: v }), this);
+        this.devices[d.id]?.subscribe((v) => this.trigger({ [d.id]: v }), this);
       }
     });
   }
@@ -60,9 +60,7 @@ export class Home extends Trigger<any> {
 
     if (this.subscriptions.length === 1) {
       this.devices.forEach((val, i) => {
-        if (val !== undefined) {
-          val.subscribe((v) => this.trigger({ [i]: v }), this);
-        }
+        val?.subscribe((v) => this.trigger({ [i]: v }), this);
       });
     }
 
@@ -71,9 +69,7 @@ export class Home extends Trigger<any> {
 
       if (this.subscriptions.length === 0) {
         this.devices.forEach((val) => {
-          if (val !== undefined) {
-            val.disconnectAnchor(this);
-          }
+          val?.disconnectAnchor(this);
         });
       }
     };

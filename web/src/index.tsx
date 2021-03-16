@@ -1,9 +1,16 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import { App } from "./app";
 import RoomComponent from "./components/room";
 import RoomlistComponent from "./components/roomlist";
 import TitlebarComponent from "./components/titlebar";
 import "./style.css";
+
+declare global {
+  interface Window {
+    app?: App;
+  }
+}
 
 function App() {
   // tmp
