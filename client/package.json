@@ -9,10 +9,11 @@
     "appId": "net.lelux.haus",
     "files": [
       "dist/**/*",
+      "dist2/**/*",
+      "public/**/*",
       "node_modules/**/*",
       "package.json"
     ],
-    "extraResources": "out/**/*",
     "win": {
       "target": [
         "nsis",
@@ -20,7 +21,8 @@
       ]
     },
     "directories": {
-      "buildResources": "resources"
+      "buildResources": "public/icons",
+      "output": "out"
     },
     "publish": null
   },

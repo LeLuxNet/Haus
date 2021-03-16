@@ -4,7 +4,7 @@ module.exports = {
   entry: "./src/index.tsx",
   devtool: "inline-source-map",
   devServer: {
-    contentBase: path.join(__dirname, "public"),
+    contentBase: [path.join(__dirname, "dist"), path.join(__dirname, "public")],
   },
   module: {
     rules: [
@@ -12,6 +12,19 @@ module.exports = {
         test: /\.tsx?$/,
         use: "ts-loader",
         exclude: /node_modules/,
+      },
+      {
+        test: /\.css$/i,
+        use: [
+          "style-loader",
+          {
+            loader: "css-loader",
+            options: {
+              importLoaders: 1,
+            },
+          },
+          "postcss-loader",
+        ],
       },
     ],
   },

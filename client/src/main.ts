@@ -13,12 +13,14 @@ function createWindow() {
       enableRemoteModule: true,
       preload: join(__dirname, "preload.js"),
     },
+    icon: join(__dirname, "../public/logos/icon.png"),
   });
 
   if (dev) {
     mainWindow.loadURL("http://localhost:8080");
   } else {
-    mainWindow.loadFile(join(__dirname, "../out/index.html"));
+    console.log(__dirname);
+    mainWindow.loadFile(join(__dirname, "../public/index.html"));
   }
 
   // mainWindow.webContents.openDevTools();

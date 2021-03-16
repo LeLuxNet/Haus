@@ -5,7 +5,7 @@
   "scripts": {
     "postinstall": "concurrently \"cd client && npm i\" \"cd server && npm i\" \"cd web && npm i\"",
     "dev:web": "cd web && npm run dev",
-    "dev:client": "concurrently --kill-others npm:dev:web \"cd client && npm run dev\"",
+    "dev:client": "concurrently -ks first npm:dev:web \"cd client && npm run dev\"",
     "build:web": "cd web && npm run build",
     "build:client": "npm run build:web && cd client && npm run build",
     "test": "concurrently \"cd server && npm test\""

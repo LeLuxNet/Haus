@@ -1,0 +1,31 @@
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  outline: none !important;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+}
+
+.arcade {
+  font-family: "Press Start 2P", monospace;
+}
+
+.draggable {
+  -webkit-app-region: drag;
+}
+.not-draggable {
+  -webkit-app-region: no-drag;
+}
+
+.split {
+  grid-template-columns: min-content 1fr;
+  grid-template-rows: 1fr;
+  height: calc(100vh - 2rem);
+}
