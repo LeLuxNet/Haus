@@ -1,30 +1,42 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
 import { join } from "path";
 
 const dev = process.env.APP_DEV !== undefined;
 
 function createWindow() {
-  const mainWindow = new BrowserWindow({
+  const win = new BrowserWindow({
     width: 800,
     height: 600,
     frame: false,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
-      enableRemoteModule: true,
+      allowRunningInsecureContent: false,
+      contextIsolation: true,
+      enableRemoteModule: false,
+      nodeIntegration: false,
+      sandbox: true,
       preload: join(__dirname, "preload.js"),
     },
     icon: join(__dirname, "../public/logos/icon.png"),
   });
 
   if (dev) {
-    mainWindow.loadURL("http://localhost:8080");
+    win.loadURL("http://localhost:8080");
   } else {
     console.log(__dirname);
-    mainWindow.loadFile(join(__dirname, "../public/index.html"));
+    win.loadFile(join(__dirname, "../public/index.html"));
   }
 
-  // mainWindow.webContents.openDevTools();
+  ipcMain.handle("minimize", () => win.minimize());
+  ipcMain.handle("toggleMaximize", () => {
+    if (win.isMaximized()) {
+      win.unmaximize();
+    } else {
+      win.maximize();
+    }
+  });
+  ipcMain.handle("close", () => win.close());
+
+  // win.webContents.openDevTools();
 }
 
 app.on("ready", () => {

@@ -1,4 +1,5 @@
-export function getElectron() {
-  if (window.require === undefined) return;
-  return window.require("electron");
+import { App } from "./app";
+
+export function getApp(): App | undefined {
+  return (window as any).app;
 }
