@@ -2,12 +2,15 @@ import React, { useState } from "react";
 import { Copy, Minus, Square, X } from "react-feather";
 import { App } from "../app";
 
-export default function TitlebarComponent({ title }: { title: string }) {
+export default function TitlebarComponent({ title, name }: { title: string, name: string }) {
   const app = window.app;
 
   return (
     <div className="w-screen h-8 flex justify-between items-center pl-3 grid-cols-2 draggable">
-      <div className="arcade text-xs">{title}</div>
+      <div className="flex text-xs">
+        <div className="arcade mr-2">{title}</div>
+        <div>{name}</div>
+      </div>
       {app && <WindowControls app={app} />}
     </div>
   );

@@ -20,8 +20,21 @@ body {
 .draggable {
   -webkit-app-region: drag;
 }
+
 .not-draggable {
   -webkit-app-region: no-drag;
+}
+
+.transition-border {
+  transition: 0.2s border-radius ease-out;
+}
+
+.transition-slide {
+  transition: 0.3s background, 0.3s margin-left;
+}
+
+.rounded-50pc {
+  border-radius: 50%;
 }
 
 .split {
