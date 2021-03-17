@@ -25,10 +25,12 @@
     "discord.js": "^12.5.1",
     "express": "^4.17.1",
     "graphql": "^15.5.0",
-    "graphql-ws": "^4.2.1",
     "matrix-js-sdk": "^9.8.0",
     "node-telegram-bot-api": "^0.51.0",
+    "reflect-metadata": "^0.1.13",
+    "subscriptions-transport-ws": "^0.9.18",
     "suncalc": "^1.8.0",
+    "type-graphql": "^1.1.1",
     "websocket": "^1.0.33"
   },
   "devDependencies": {

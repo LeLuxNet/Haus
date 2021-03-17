@@ -1,15 +1,42 @@
+import { Arg, Field, Int, ObjectType } from "type-graphql";
 import { Device } from "../device";
 import { PluginInstance } from "../plugins";
 import { Trigger } from "../trigger";
+import { Room } from "./room";
 
 export const homes: Map<string, Home> = new Map();
 
+@ObjectType()
 export class Home extends Trigger<any> {
+  @Field(() => Int)
   id: string;
+
+  @Field()
   name: string;
 
   plugins: (PluginInstance | undefined)[] = [];
   devices: (Device | undefined)[] = [];
+  rooms: (Room | undefined)[] = [];
+
+  @Field(() => [Room], { name: "rooms" })
+  allRooms() {
+    return this.rooms.filter((d) => d !== undefined);
+  }
+
+  @Field(() => Room, { nullable: true })
+  room(@Arg("id", () => Int) id: number) {
+    return this.rooms[id];
+  }
+
+  @Field(() => [Device], { name: "devices" })
+  allDevices() {
+    return this.devices.filter((d) => d !== undefined);
+  }
+
+  @Field(() => Device, { nullable: true })
+  device(@Arg("id", () => Int) id: number) {
+    return this.devices[id];
+  }
 
   private dIds: Map<string, number> = new Map();
   private nextDId: number;

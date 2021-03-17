@@ -1,35 +1,42 @@
 import express from "express";
 import { execute, subscribe } from "graphql";
-import { useServer } from "graphql-ws/lib/use/ws";
-import { join } from "path";
-import { Server } from "ws";
+import { resolve } from "path";
+import { SubscriptionServer } from "subscriptions-transport-ws";
+import { buildSchema } from "type-graphql";
 import { Logger } from "../logger";
-import { roots, schema } from "./graphql";
+import { homes } from "../server/home";
+import { HomeResolver } from "./graphql/home";
 
 const port = 80;
 
-export function createApi() {
+const schema = buildSchema({
+  resolvers: [HomeResolver],
+  emitSchemaFile: resolve(__dirname, "schema.gql"),
+});
+
+export const roots = {
+  query: {
+    home: ({ id }: { id: string }) => {
+      return homes.get(id);
+    },
+  },
+  subscription: {},
+};
+
+export async function createApi() {
   const app = express();
 
-  app.get("/", express.static(join(__dirname, "../../web/dist")));
-  app.get("/*", (_, res) =>
-    res.sendFile(join(__dirname, "../../web/index.html"))
-  );
-
-  const server = app.listen(port, () => {
-    const wsServer = new Server({
-      server,
-      path: "/graphql",
-    });
-
-    useServer(
+  const server = app.listen(port, async () => {
+    new SubscriptionServer(
       {
-        schema,
-        roots,
+        schema: await schema,
         execute,
         subscribe,
       },
-      wsServer
+      {
+        server,
+        path: "/graphql",
+      }
     );
 
     Logger._.info(`Listening on port ${port}`);

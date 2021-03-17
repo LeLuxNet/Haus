@@ -1,11 +1,16 @@
-import { Color } from "./lighting/color";
+import { Field, Int, ObjectType } from "type-graphql";
 import { Platform } from "./platform";
 import { State } from "./state";
 import { Trigger } from "./trigger";
 
+@ObjectType()
 export abstract class Device extends Trigger<any> {
+  @Field(() => Int)
   id: number;
+
+  @Field()
   name?: string;
+
   platform: Platform;
 
   reachable?: State<boolean>;
