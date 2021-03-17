@@ -3,9 +3,11 @@ import Room from "../../interfaces/room";
 
 export default function RoomlistComponent({
   rooms,
+  currentRoom,
   changeRoom,
 }: {
   rooms: Room[];
+  currentRoom: number;
   changeRoom: (room: Room) => void;
 }) {
   return (
@@ -14,7 +16,11 @@ export default function RoomlistComponent({
         if (room) {
           return (
             <button
-              className="w-16 h-16 bg-gray-200 bg-blue rounded-full mb-3 not-draggable select-none text-gray-500 text-4xl place-items-center flex justify-center"
+              className={`w-16 h-16 transition-border bg-gray-200 text-grey-800 mb-3 not-draggable select-none text-4xl place-items-center flex justify-center ${
+                currentRoom == room.id
+                  ? "rounded-2xl"
+                  : "rounded-50pc hover:rounded-2xl"
+              }`}
               key={room.id}
               onClick={() => changeRoom(room)}
             >

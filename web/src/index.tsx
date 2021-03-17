@@ -52,11 +52,12 @@ function App() {
   const [currentRoom, setCurrentRoom] = React.useState(rooms[0]);
   return (
     <div className="bg-gray-100 w-screen h-screen not-selectable">
-      <TitlebarComponent title="LeLuxNet"></TitlebarComponent>
+      <TitlebarComponent title="LeLuxNet" name="Testhaus"></TitlebarComponent>
       <div className="grid split">
         <RoomlistComponent
           rooms={rooms}
           changeRoom={setCurrentRoom}
+          currentRoom={currentRoom.id}
         ></RoomlistComponent>
         <RoomComponent room={rooms[currentRoom.id]}></RoomComponent>
       </div>
