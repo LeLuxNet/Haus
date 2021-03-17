@@ -16,6 +16,9 @@
     "testEnvironment": "node",
     "modulePathIgnorePatterns": [
       "dist"
+    ],
+    "setupFiles": [
+      "./test-setup.ts"
     ]
   },
   "dependencies": {
