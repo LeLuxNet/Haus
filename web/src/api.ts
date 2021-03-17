@@ -10,5 +10,5 @@ const wsLink = new WebSocketLink({
 
 export const client = new ApolloClient({
   link: wsLink,
-  cache: new InMemoryCache({}),
+  cache: new InMemoryCache(),
 });

@@ -1,13 +1,27 @@
 {
   "compilerOptions": {
+    "target": "es6",
     "module": "commonjs",
-    "noImplicitAny": true,
-    "sourceMap": true,
+    "lib": ["es2019", "dom"],
     "outDir": "dist",
-    "baseUrl": ".",
+    "rootDir": "src",
+    "moduleResolution": "node",
+    "removeComments": true,
+    "downlevelIteration": true,
+    "strict": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "resolveJsonModule": true,
     "paths": {
-      "*": ["node_modules/*"]
-    }
-  },
-  "include": ["src/**/*"]
+      "matrix-js-sdk": ["./node_modules/@types/matrix-js-sdk/index.d.ts"]
+    },
+    "typeRoots": ["typings", "node_modules/@types"]
+  }
 }
