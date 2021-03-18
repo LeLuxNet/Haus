@@ -19,3 +19,5 @@ if (!TEST) {
   console.log("-".repeat(msg.length));
   console.log();
 }
+
+import "reflect-metadata";

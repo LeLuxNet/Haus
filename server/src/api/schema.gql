@@ -3,9 +3,23 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
+type Color {
+  b: Float!
+  g: Float!
+  h: Float!
+  r: Float!
+  s: Float!
+  v: Float!
+  x: Float!
+  y: Float!
+  z: Float!
+}
+
 type Device {
   id: Int!
   name: String!
+  value(key: String!): Value
+  values: [Value!]!
 }
 
 type Home {
@@ -17,6 +31,29 @@ type Home {
   rooms: [Room!]!
 }
 
+input InputColor {
+  b: Float
+  ct: Float
+  g: Float
+  h: Float
+  r: Float
+  s: Float
+  v: Float
+  x: Float
+  y: Float
+  z: Float
+}
+
+input InputValue {
+  boolean: Boolean
+  color: InputColor
+  number: Float
+}
+
+type Mutation {
+  setValue(device: Float!, home: String!, key: String!, value: InputValue!): Value
+}
+
 type Query {
   home(id: String!): Home
 }
@@ -25,4 +62,11 @@ type Room {
   devices: [Device!]!
   id: Int!
   name: String!
+}
+
+type Value {
+  boolean: Boolean
+  color: Color
+  key: String!
+  number: Float
 }

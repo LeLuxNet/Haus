@@ -15,12 +15,22 @@ export class Color {
     return new Color(Color.xn, Color.yn, Color.zn);
   }
 
+  /**
+   * @param {number} x X (0-1)
+   * @param {number} y Y (0-1)
+   * @param {number} z Z (0-1)
+   */
   constructor(x: number, y: number, z: number) {
     this.x = x;
     this.y = y;
     this.z = z;
   }
 
+  /**
+   * @param {number} r Red (0-255)
+   * @param {number} g Green (0-255)
+   * @param {number} b Blue (0-255)
+   */
   static fromRGB(r: number, g: number, b: number) {
     const adjust = (u: number) => {
       if (u <= 0.04045) {
@@ -41,6 +51,11 @@ export class Color {
     return new Color(x, y, z);
   }
 
+  /**
+   * @param {number} h Hue (0-360)
+   * @param {number} s Saturation (0-255)
+   * @param {number} v Value/Brightness (0-255)
+   */
   static fromHSV(h: number, s: number, v: number) {
     s /= 255;
     v /= 255;
@@ -76,6 +91,11 @@ export class Color {
     return Color.fromRGB((r + m) * 255, (g + m) * 255, (b + m) * 255);
   }
 
+  /**
+   * @param {number} L Lightness (-128-127)
+   * @param {number} a green-red (-128-127)
+   * @param {number} b blue-yellow (0-100)
+   */
   static fromCIELAB(L: number, a: number, b: number) {
     const delta = 6 / 29;
     const f = (t: number) =>
@@ -90,6 +110,11 @@ export class Color {
     return new Color(x, y, z);
   }
 
+  /**
+   * @param {number} x x ()
+   * @param {number} y y ()
+   * @param {number} Y Y ()
+   */
   static fromXYY(x: number, y: number, Y: number) {
     if (y === 0) {
       return new Color(0, 0, 0);
@@ -98,6 +123,9 @@ export class Color {
     return new Color((x * Y) / y, Y, ((1 - x - y) * Y) / y);
   }
 
+  /**
+   * @param {number} T Color temperature in Kelvin
+   */
   static fromCCT(T: number) {
     var x: number;
     var y: number;
@@ -139,6 +167,10 @@ export class Color {
     return Color.fromXYY(x, y, 1);
   }
 
+  /**
+   * @param {number} hue Hue (0-1)
+   * @param {number} L Lightness (0-100)
+   */
   static chroma(hue: number, L: number = 75) {
     const a = 127 * Math.cos(2 * Math.PI * hue);
     const b = 127 * Math.sin(2 * Math.PI * hue);
