@@ -1,12 +1,13 @@
+import { importPlugin } from ".";
 import { pluginLibrary } from "./library";
 
 describe("Check if filepaths in the plugin library are correct", () => {
-  Object.entries(pluginLibrary).forEach(([id, path]) => {
+  Object.keys(pluginLibrary).forEach((id) => {
     it(id, async () => {
-      const plugin = (await import(path)).default;
+      const plugin = await importPlugin(id);
 
-      expect(typeof plugin.name).toBe("string");
-      expect(plugin.create).toBeInstanceOf(Function);
+      expect(typeof plugin!.name).toBe("string");
+      expect(plugin!.create).toBeInstanceOf(Function);
     });
   });
 });

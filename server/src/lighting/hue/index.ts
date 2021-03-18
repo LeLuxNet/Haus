@@ -166,8 +166,7 @@ function parseColor(state: any) {
     );
   } else if (state.ct !== undefined) {
     const c = Color.fromCCT(1e9 / state.ct);
-    c.y = state.bri / maxBri;
-    return c;
+    return new Color(c.x, state.bri / maxBri, c.z);
   }
 
   const bri = state.bri / briMult;

@@ -16,6 +16,8 @@ export interface Plugin {
     home: Home,
     logger: Logger
   ) => Promise<PluginInstance>;
+
+  discover?: (logger: Logger) => {};
 }
 
 export interface LoadedPlugin extends Plugin {
@@ -36,12 +38,19 @@ interface Dependency {
   version: string;
 }
 
-export async function loadPlugin(data: any, home: Home) {
-  const path = pluginLibrary[data.type];
+export async function importPlugin(type: string) {
+  const path = pluginLibrary[type];
   if (path === undefined) return;
 
   const plugin = (await import(path)).default as LoadedPlugin;
-  plugin.id = data.type;
+  plugin.id = type;
+
+  return plugin;
+}
+
+export async function loadPlugin(data: any, home: Home) {
+  const plugin = await importPlugin(data.type);
+  if (plugin === undefined) return;
 
   const logger = new Logger(plugin.name);
 
