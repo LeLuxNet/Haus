@@ -1,9 +1,10 @@
-@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Inter&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter&family=Press+Start+2P&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* BASE */
 
 * {
   outline: none !important;
@@ -12,6 +13,8 @@
 body {
   font-family: "Inter", sans-serif;
 }
+
+/* UTIL */
 
 .arcade {
   font-family: "Press Start 2P", monospace;
@@ -25,6 +28,8 @@ body {
   -webkit-app-region: no-drag;
 }
 
+/* ANIMATIONS */
+
 .transition-border {
   transition: 0.2s border-radius ease-out;
 }
@@ -37,8 +42,30 @@ body {
   border-radius: 50%;
 }
 
+/* LAYOUT */
+
 .split {
   grid-template-columns: min-content 1fr;
   grid-template-rows: 1fr;
   height: calc(100vh - 2rem);
+}
+
+/* INPUTS */
+
+.vertical-slider input[type="range"] {
+  position: relative;
+  right: 4.25rem;
+  top: 68.25px;
+}
+.vertical-slider input[type="range"]::-webkit-slider-thumb,
+.vertical-slider input[type="range"]::-moz-range-thumb {
+  appearance: none;
+  width: 1rem;
+  height: 40px;
+  border: 8px white solid;
+  background: transparent;
+  border-radius: 0.75rem;
+  box-shadow: inset 0px 0px 2px 1px rgba(0, 0, 0, 0.5),
+    0px 0px 2px 1px rgba(0, 0, 0, 0.5);
+  cursor: grab;
 }

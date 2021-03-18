@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import Device from "../../interfaces/device";
+import BoxComponent from "../box";
+import ColorPickerComponent from "../inputs/colorpicker";
 import ToggleComponent from "../inputs/toggle";
 
 export default function Device({ device }: { device: Device }) {
@@ -15,7 +17,11 @@ export default function Device({ device }: { device: Device }) {
         <ToggleComponent state={activated} changeState={setActivationState} />
       </div>
       <p className="text-gray-700">Status: an</p>
-      <div className="grid"></div>
+      <div className="mt-5">
+        <BoxComponent title="Farbe">
+          <ColorPickerComponent />
+        </BoxComponent>
+      </div>
     </div>
   );
 }
