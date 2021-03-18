@@ -15,7 +15,6 @@ const sizeMult = 0.24;
 
 export default <Plugin>{
   name: "Nanoleaf",
-  id: "nanoleaf",
 
   create: async ({ host, key }, id, home, logger) => {
     const api = axios.create({

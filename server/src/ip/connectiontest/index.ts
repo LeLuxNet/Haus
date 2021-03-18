@@ -52,7 +52,6 @@ export const services: { [key: string]: ConnectionService } = {
 
 export default <Plugin>{
   name: "Connection check",
-  id: "connection-check",
 
   create: async ({ service }, id) => {
     const s = services[service];

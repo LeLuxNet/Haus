@@ -6,7 +6,6 @@ import { Counter } from "../counter";
 
 export default <Plugin>{
   name: "YouTube",
-  id: "youtube-subscribers",
 
   create: async ({ id, key }, pid) => {
     const update = new Update(() =>

@@ -7,7 +7,6 @@ import { Counter } from "../counter";
 
 export default <Plugin>{
   name: "Reddit",
-  id: "reddit-post-score",
 
   create: async ({ id }, pid) => {
     const update = new Update(async () => {

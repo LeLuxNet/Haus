@@ -11,7 +11,6 @@ const session =
 
 export default <Plugin>{
   name: "Kickstarter",
-  id: "kickstarter",
 
   create: async ({ owner, project }, id) => {
     const update = new Update(async () => {

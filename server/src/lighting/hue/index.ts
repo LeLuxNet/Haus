@@ -176,7 +176,6 @@ function parseColor(state: any) {
 
 export default <Plugin>{
   name: "Philips Hue",
-  id: "philips-hue",
 
   create: async ({ host, key }, id, home, logger) => {
     const api = axios.create({

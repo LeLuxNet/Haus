@@ -19,7 +19,6 @@ export function toRzColor(color?: Color) {
 
 export default <Plugin>{
   name: "Razer",
-  id: "razer",
 
   create: async ({}, id, home, logger) => {
     const res = await axios.post("http://localhost:54235/razer/chromasdk", {

@@ -9,7 +9,6 @@ import { Counter } from "../counter";
 
 export default <Plugin>{
   name: "GitHub",
-  id: "github-followers",
 
   create: async ({ username }, id) => {
     const update = new Update(async () => {
