@@ -10,7 +10,6 @@ const api = axios.create({
 
 export default <Plugin>{
   name: "Cryptocurrencies",
-  id: "cryptocurrencies",
 
   create: async ({ id }, pid) => {
     const update = new Update(async () => {

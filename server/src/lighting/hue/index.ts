@@ -166,8 +166,7 @@ function parseColor(state: any) {
     );
   } else if (state.ct !== undefined) {
     const c = Color.fromCCT(1e9 / state.ct);
-    c.y = state.bri / maxBri;
-    return c;
+    return new Color(c.x, state.bri / maxBri, c.z);
   }
 
   const bri = state.bri / briMult;
@@ -176,7 +175,6 @@ function parseColor(state: any) {
 
 export default <Plugin>{
   name: "Philips Hue",
-  id: "philips-hue",
 
   create: async ({ host, key }, id, home, logger) => {
     const api = axios.create({

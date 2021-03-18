@@ -3,10 +3,10 @@ import { Logger } from "../logger";
 import { Home } from "../server/home";
 import { Trigger } from "../trigger";
 import { exec } from "../utils/promisify";
+import { pluginLibrary } from "./library";
 
 export interface Plugin {
   name: string;
-  id: string;
 
   deps?: Dependency[];
 
@@ -16,6 +16,12 @@ export interface Plugin {
     home: Home,
     logger: Logger
   ) => Promise<PluginInstance>;
+
+  discover?: (logger: Logger) => {};
+}
+
+export interface LoadedPlugin extends Plugin {
+  id: string;
 }
 
 export interface PluginInstance {
@@ -32,7 +38,20 @@ interface Dependency {
   version: string;
 }
 
-export async function loadPlugin(plugin: Plugin, data: any, home: Home) {
+export async function importPlugin(type: string) {
+  const path = pluginLibrary[type];
+  if (path === undefined) return;
+
+  const plugin = (await import(path)).default as LoadedPlugin;
+  plugin.id = type;
+
+  return plugin;
+}
+
+export async function loadPlugin(data: any, home: Home) {
+  const plugin = await importPlugin(data.type);
+  if (plugin === undefined) return;
+
   const logger = new Logger(plugin.name);
 
   if (plugin.deps !== undefined) {
