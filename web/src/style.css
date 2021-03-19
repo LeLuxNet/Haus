@@ -28,6 +28,10 @@ body {
   -webkit-app-region: no-drag;
 }
 
+.cursor-crosshair {
+  cursor: crosshair;
+}
+
 /* ANIMATIONS */
 
 .transition-border {
@@ -57,7 +61,19 @@ body {
   right: 4.25rem;
   top: 68.25px;
 }
-.vertical-slider input[type="range"]::-webkit-slider-thumb,
+.vertical-slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  box-sizing: content-box;
+  display: block;
+  width: 1rem;
+  height: 40px;
+  border: 8px white solid;
+  background: transparent;
+  border-radius: 0.75rem;
+  box-shadow: inset 0px 0px 2px 1px rgba(0, 0, 0, 0.5),
+    0px 0px 2px 1px rgba(0, 0, 0, 0.5);
+  cursor: grab;
+}
 .vertical-slider input[type="range"]::-moz-range-thumb {
   appearance: none;
   width: 1rem;
