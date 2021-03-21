@@ -1,8 +1,8 @@
 import axios from "axios";
 import { AUTHOR, AUTHOR_LINK, NAME } from "../../const";
+import { Platform } from "../../platform";
 import { Plugin } from "../../plugins";
 import { Color } from "../color";
-import { Lighting } from "../lighting";
 import { RazerHeadset } from "./devices/headset";
 import { RazerKeyboard } from "./devices/keyboard";
 import { RazerKeypad } from "./devices/keypad";
@@ -45,15 +45,14 @@ export default <Plugin>{
 
     const heartbeat = global.setInterval(() => api.put("heartbeat"), 1000);
 
-    const instance = new Lighting(id, home, logger, async (platform) => {
-      return [
-        new RazerHeadset(api, platform, home),
-        new RazerKeyboard(api, platform, home),
-        new RazerKeypad(api, platform, home),
-        new RazerMousepad(api, platform, home),
-        new RazerMouse(api, platform, home),
-      ];
-    });
+    const instance = new Platform(id, home, logger, async (platform) => [
+      new RazerHeadset(api, platform, home),
+      new RazerKeyboard(api, platform, home),
+      new RazerKeypad(api, platform, home),
+      new RazerMousepad(api, platform, home),
+      new RazerMouse(api, platform, home),
+    ]);
+
     instance.stop = () => {
       clearInterval(heartbeat);
       return api.delete("");

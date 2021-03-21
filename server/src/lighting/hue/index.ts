@@ -10,7 +10,6 @@ import { Home } from "../../server/home";
 import { State } from "../../state";
 import { Color } from "../color";
 import { Light } from "../light";
-import { Lighting } from "../lighting";
 import { Outlet } from "../outlet";
 import { ColorState } from "../state";
 import { HueButton } from "./button";
@@ -181,7 +180,7 @@ export default <Plugin>{
       baseURL: `${host}/api/${key}`,
     });
 
-    return new Lighting(id, home, logger, async (platform) => [
+    return new Platform(id, home, logger, async (platform) => [
       ...(await allLights(api, platform, home, logger)),
       ...(await allSensors(api, platform, home, logger)),
     ]);

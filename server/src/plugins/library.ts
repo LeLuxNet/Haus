@@ -8,4 +8,7 @@ export const pluginLibrary: { [id: string]: string } = {
   razer: "../lighting/razer",
   "reddit-post-score": "../counter/reddit",
   "youtube-subscribers": "../counter/youtube",
+
+  // Debug
+  debug: "../debug",
 };

@@ -1,9 +1,9 @@
 import axios from "axios";
+import { Platform } from "../../platform";
 import { Plugin } from "../../plugins";
 import { State } from "../../state";
 import { Color } from "../color";
 import { Light } from "../light";
-import { Lighting } from "../lighting";
 import { ColorState } from "../state";
 
 const briMult = 100 / 255;
@@ -21,7 +21,7 @@ export default <Plugin>{
       baseURL: `${host}/api/v1/${key}`,
     });
 
-    return new Lighting(id, home, logger, async (platform) => [
+    return new Platform(id, home, logger, async (platform) => [
       new Light(
         home.getDeviceId(platform),
         platform,
