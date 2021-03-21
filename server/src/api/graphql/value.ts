@@ -25,22 +25,19 @@ export class Value<T extends TriggerTypes> {
 
   @Field(() => Float, { nullable: true })
   async number() {
-    const val =
-      this.val.get === undefined ? this.val.last : await this.val.get();
+    const val = this.val.get();
     return typeof val === "number" ? val : undefined;
   }
 
   @Field(() => Boolean, { nullable: true })
   async boolean() {
-    const val =
-      this.val.get === undefined ? this.val.last : await this.val.get();
+    const val = this.val.get();
     return typeof val === "boolean" ? val : undefined;
   }
 
   @Field(() => ColorValue, { nullable: true })
   async color() {
-    const val =
-      this.val.get === undefined ? this.val.last : await this.val.get();
+    const val = this.val.get();
     return val instanceof Color ? new ColorValue(val) : undefined;
   }
 

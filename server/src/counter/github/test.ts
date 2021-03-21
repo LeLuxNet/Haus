@@ -15,7 +15,7 @@ describe("GitHub follower counter", () => {
 
     expect(val).toBeGreaterThanOrEqual(0);
     expect(
-      avatar.startsWith("https://avatars.githubusercontent.com/")
+      avatar!.startsWith("https://avatars.githubusercontent.com/")
     ).toBeTruthy();
   });
 });

@@ -2,13 +2,12 @@ import { Color } from "./lighting/color";
 import { Trigger } from "./trigger";
 import { Update } from "./update";
 
-type Get<T> = () => Promise<T>;
 type Set<T> = (val: T) => Promise<void>;
 
 export interface StateConstructor<T> {
   initial?: T;
 
-  get?: Get<T>;
+  get?: () => Promise<T>;
   set?: Set<T>;
 
   autoUpdate?: number;
@@ -18,39 +17,51 @@ export interface StateConstructor<T> {
 
 export class State<T> extends Trigger<T> {
   last?: T;
+  lastUpdated: number;
 
   autoUpdate?: number;
-  _autoUpdateInterval?: NodeJS.Timeout;
+  _autoUpdateInterval?: number;
 
-  readonly get?: Get<T>;
+  readonly get: (force?: boolean) => Promise<T | undefined>;
   readonly set?: Set<T>;
 
   constructor({ initial, get, set, autoUpdate, update }: StateConstructor<T>) {
     super();
     this.last = initial;
+    this.lastUpdated = Date.now();
     this.autoUpdate = autoUpdate;
 
     if (get !== undefined) {
-      this.get = () =>
-        get().then((val) => {
-          this.update(val);
-          return val;
-        });
+      this.get = async (force) => {
+        if (this.shouldUpdate || force) {
+          return get().then((val) => {
+            this.update(val);
+            return val;
+          });
+        } else {
+          return this.last;
+        }
+      };
     } else if (update !== undefined) {
-      this.get = () => update.fun().then(() => this.last!);
+      this.get = async (force) => {
+        if (this.shouldUpdate || force) {
+          await update.fun();
+        }
+        return this.last;
+      };
+    } else {
+      this.get = async () => this.last;
     }
 
-    if (this.get !== undefined) {
-      if (this.last === undefined) {
-        this.get();
-      }
+    if (this.last === undefined) {
+      this.get();
+    }
 
-      if (this.subscriptions.length < 0 && this.autoUpdate !== undefined) {
-        this._autoUpdateInterval = global.setInterval(
-          this.get,
-          this.autoUpdate * 1000
-        );
-      }
+    if (this.subscriptions.length < 0 && this.autoUpdate !== undefined) {
+      this._autoUpdateInterval = global.setInterval(
+        this.get,
+        this.autoUpdate * 1000
+      );
     }
 
     if (set !== undefined) {
@@ -77,9 +88,15 @@ export class State<T> extends Trigger<T> {
     return state;
   }
 
+  get shouldUpdate() {
+    if (this.autoUpdate === undefined) return true;
+    return Date.now() > this.lastUpdated + this.autoUpdate * 1000;
+  }
+
   update(value: T) {
     if (!State.equal(this.last, value)) {
       this.last = value;
+      this.lastUpdated = Date.now();
       this.trigger(value);
     }
   }
